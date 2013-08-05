@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Myvideobuzz : MyVideoBuzz" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Myvideobuzz</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/utmostsolutions/myvideobuzz">View on GitHub</a>
+
+          <h1 id="project_title">Myvideobuzz</h1>
+          <h2 id="project_tagline">MyVideoBuzz</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/utmostsolutions/myvideobuzz/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/utmostsolutions/myvideobuzz/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="roku-youtube" class="anchor" href="#roku-youtube"><span class="octicon octicon-link"></span></a>Roku YouTube</h1>
+
+<p>A YouTube app for the Roku DVP that supports automatic video quality switching, 
+user favorites, searches and more based on the <a href="http://bitbucket.org/chrishoffman/roku-picasa/">Picasa Web Albums Roku app</a> 
+by <a href="http://bitbucket.org/chrishoffman">Chris Hoffman</a>.</p>
+
+<p>The channel performs OAuth authentication to access your YouTube account via an 
+address I've set up on my domain running Chris Hoffman's excellent <a href="https://bitbucket.org/chrishoffman/appengine-rokulink">Google Apps Engine
+RokuLink project</a>, great for
+serving your own OAuth requests if my server goes down.</p>
+
+<h3>
+<a name="httpsownerrokucomadd3k5skg" class="anchor" href="#httpsownerrokucomadd3k5skg"><span class="octicon octicon-link"></span></a><a href="https://owner.roku.com/add/3K5SKG">https://owner.roku.com/add/3K5SKG</a>
+</h3>
+
+<h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>Enable development mode on your Roku Streaming Player with the following remote 
+control sequence:</p>
+
+<pre><code>Home 3x, Up 2x, Right, Left, Right, Left, Right
+</code></pre>
+
+<p>When devleopment mode is enabled on your Roku, you can install dev packages
+from the Application Installer which runs on your device at your device's IP
+address. Open up a standard web browser and visit the following URL:</p>
+
+<pre><code>http://&lt;rokuPlayer-ip-address&gt; (for example, http://192.168.1.6)
+</code></pre>
+
+<p><a href="https://bitbucket.org/jesstech/roku-youtube/get/master.zip">Download the source as a zip</a> and upload it to your Roku device.</p>
+
+<p>Due to limitations in the sandboxing of development Roku channels, you can only
+have one development channel installed at a time.</p>
+
+<h1>
+<a name="advanced" class="anchor" href="#advanced"><span class="octicon octicon-link"></span></a>Advanced</h1>
+
+<h3>
+<a name="debugging" class="anchor" href="#debugging"><span class="octicon octicon-link"></span></a>Debugging</h3>
+
+<p>Your Roku's debug console can be accessed by telnet at port 8085:</p>
+
+<pre><code>telnet &lt;rokuPlayer-ip-address&gt; 8085
+</code></pre>
+
+<h3>
+<a name="building-from-source" class="anchor" href="#building-from-source"><span class="octicon octicon-link"></span></a>Building from source</h3>
+
+<p>The <a href="http://www.roku.com/developer">Roku Developer SDK</a> includes a handy Make script 
+for automatically zipping and installing the channel onto your device should you make
+any changes.  Just add the project to your SDK's <code>examples/source</code> folder and run the
+<code>make install</code> command from that directory via your terminal.</p>
+
+<h2>
+<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>Want to contribute? Great! Go ahead and download the source, play around with it, fork it 
+if you like, whatever.  I've only added basic functionality, so if you think you can help
+out I'd love to have your contribution!</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Myvideobuzz maintained by <a href="https://github.com/utmostsolutions">utmostsolutions</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
