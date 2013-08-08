@@ -1,0 +1,78 @@
+
+
+// livechat by http://www.mylivechat.com/ 20121121 
+
+if(typeof(MyLiveChat)=="undefined")
+{
+	MyLiveChat={};
+	MyLiveChat.PageBeginTime=new Date().getTime();
+	MyLiveChat.LoadingHandlers=[];
+	MyLiveChat.CPRFIELDS=["SyncType","SyncStatus","SyncResult","HasReadyAgents","Departments","VisitorUrls","VisitorStatus","VisitorDuration","VisitorEntryUrl","VisitorReferUrl"];
+}
+
+//rating:37.1252398180799
+MyLiveChat.Version=1008;
+MyLiveChat.FirstRequestTimeout=18000;
+MyLiveChat.NextRequestTimeout=72000;
+MyLiveChat.SyncType='VISIT'
+MyLiveChat.SyncStatus="READY";
+MyLiveChat.SyncUserName="Guest_28702d99";
+MyLiveChat.SyncResult=null;
+MyLiveChat.HasReadyAgents=false;
+
+MyLiveChat.Departments=[];
+
+MyLiveChat.Departments.push({
+	Name:"VideoBuzz",
+	Agents:[{
+		Id:'User:1',
+		Name:'VideoBuzz',
+		Online:false
+	}],
+	Online:false
+});
+
+
+//the visitor properties will be set after sync
+MyLiveChat.VisitorUrls=[];
+
+
+
+MyLiveChat.LastLoadTime=new Date().getTime();
+MyLiveChat.VisitorStatus="VISIT";
+MyLiveChat.VisitorDuration=119;
+MyLiveChat.VisitorEntryUrl="http://www.myvideobuzz.in/Account/Install.aspx";
+MyLiveChat.VisitorReferUrl=null;
+
+
+
+function MyLiveChat_SyncToCPR()
+{
+	var arr=MyLiveChat.CPRFIELDS;
+	for(var i=0;i<arr.length;i++)
+		MyLiveChat_SetLocalData("MLC"+arr[i],MyLiveChat_CPREncode(MyLiveChat[arr[i]]));
+	MyLiveChat_SetLocalData("MLCCPRDT",String(new Date().getTime()));
+	MyLiveChat_SetLocalData("MLCCPPBT",String(MyLiveChat.PageBeginTime));
+	MyLiveChat_SetLocalData("MLCCPAPT",String(MyLiveChat.PageBeginTime));
+	
+}
+
+if(MyLiveChat.localStorage||MyLiveChat.userDataBehavior)
+{
+	MyLiveChat_SyncToCPR();
+}
+
+
+
+
+
+MyLiveChat_Initialize()
+
+//_debugurl="http://www.myvideobuzz.in/Account/Install.aspx";
+//if(_debugurl&&_debugurl.indexOf(',')!=-1)
+//{
+//	alert(_debugurl);
+//}
+
+
+
