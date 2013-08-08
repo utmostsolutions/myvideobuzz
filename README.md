@@ -1,17 +1,8 @@
-Roku YouTube
+MyVideoBuzz
 =============
 
+This project is fork of https://github.com/jesstech/Roku-YouTube, it is updated to fix the API changes and added new features and removed OAuth settings.
 
-A YouTube app for the Roku DVP that supports automatic video quality switching, 
-user favorites, searches and more based on the [Picasa Web Albums Roku app](http://bitbucket.org/chrishoffman/roku-picasa/) 
-by [Chris Hoffman](http://bitbucket.org/chrishoffman).
-
-The channel performs OAuth authentication to access your YouTube account via an 
-address I've set up on my domain running Chris Hoffman's excellent [Google Apps Engine
-RokuLink project](https://bitbucket.org/chrishoffman/appengine-rokulink), great for
-serving your own OAuth requests if my server goes down.
-
-###[https://owner.roku.com/add/3K5SKG](https://owner.roku.com/add/3K5SKG)
 
 Installation
 ============
@@ -27,7 +18,7 @@ address. Open up a standard web browser and visit the following URL:
 
     http://<rokuPlayer-ip-address> (for example, http://192.168.1.6)
 
-[Download the source as a zip](https://bitbucket.org/jesstech/roku-youtube/get/master.zip) and upload it to your Roku device.
+[Download the source as a zip](https://github.com/utmostsolutions/myvideobuzz/zipball/master) and upload it to your Roku device.
 
 Due to limitations in the sandboxing of development Roku channels, you can only
 have one development channel installed at a time.
@@ -52,6 +43,4 @@ any changes.  Just add the project to your SDK's `examples/source` folder and ru
 Contributing
 ------------
 
-Want to contribute? Great! Go ahead and download the source, play around with it, fork it 
-if you like, whatever.  I've only added basic functionality, so if you think you can help
-out I'd love to have your contribution!
+Want to contribute? Great! Please contact us http://www.myvideobuzz.in/

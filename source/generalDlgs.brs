@@ -101,7 +101,7 @@ Sub ShowDialog1Button(title As dynamic, text As dynamic, but1 As String, quickRe
                 print "Screen closed"
                 return
             else if dlgMsg.isButtonPressed()
-                print "Button pressed: "; dlgMsg.GetIndex(); " " dlgMsg.GetData()
+                'print "Button pressed: "; dlgMsg.GetIndex(); " " dlgMsg.GetData()
                 return
             endif
         endif
@@ -134,11 +134,11 @@ Function ShowDialog2Buttons(title As dynamic, text As dynamic, but1 As String, b
 
         if type(dlgMsg) = "roMessageDialogEvent"
             if dlgMsg.isScreenClosed()
-                print "Screen closed"
+                'print "Screen closed"
                 dialog = invalid
                 return 0
             else if dlgMsg.isButtonPressed()
-                print "Button pressed: "; dlgMsg.GetIndex(); " " dlgMsg.GetData()
+                'print "Button pressed: "; dlgMsg.GetIndex(); " " dlgMsg.GetData()
                 dialog = invalid
                 return dlgMsg.GetIndex()
             endif
@@ -176,4 +176,33 @@ Function getKeyboardInput(title As String, search_text As String, submit_text="S
             end if
         end if
     end while
+End Function
+
+'******************************************************
+'Show basic message dialog without buttons
+'Dialog remains up until caller releases the returned object
+'******************************************************
+
+Function ShowDialogNoButton(title As dynamic, text As dynamic) As Object
+    if not isstr(title) title = ""
+    if not isstr(text) text = ""
+
+    port = CreateObject("roMessagePort")
+    dialog = invalid
+
+    'the OneLineDialog renders a single line of text better
+    'than the MessageDialog.
+    if text = ""
+        dialog = CreateObject("roOneLineDialog")
+    else
+        dialog = CreateObject("roMessageDialog")
+        dialog.SetText(text)
+    endif
+
+    dialog.SetMessagePort(port)
+
+    dialog.SetTitle(title)
+    'dialog.ShowBusyAnimation()
+    dialog.Show()
+    return dialog
 End Function

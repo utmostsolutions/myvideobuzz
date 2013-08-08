@@ -81,7 +81,7 @@ Function http_prep(method="" As String)
     urlobj.SetCertificatesFile("common:/certs/ca-bundle.crt")
     urlobj.EnableEncodings(true)
     urlobj.AddHeader("Expect","")
-    urlobj.RetainBodyOnError(true) 
+    'urlobj.RetainBodyOnError(true) 
     url = m.GetUrl()
     urlobj.SetUrl(url)
     if m.method<>"" and m.method<>method then m.method=method 

@@ -1,0 +1,58 @@
+<feed>
+  <entry>
+    <title>Smosh</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/Smosh/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>RayWilliamJohnson</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/RayWilliamJohnson/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>Jenna Marbles</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/JennaMarbles/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>nigahiga</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/nigahiga/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>RihannaVEVO</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/RihannaVEVO/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>machinima</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/machinima/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>PewDiePie</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/PewDiePie/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>OneDirectionVEVO</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/OneDirectionVEVO/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>HolaSoyGerman</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/HolaSoyGerman/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>freddiew</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/freddiew/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>TheEllenShow</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/TheEllenShow/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>College Humor</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/collegehumor/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>ShaneDawsonTV</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/ShaneDawsonTV/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+  <entry>
+    <title>EpicMealTime</title>
+    <content type="application/atom+xml;type=feed" src="http://gdata.youtube.com/feeds/api/users/EpicMealTime/uploads?v=2&amp;start-index=1&amp;max-results=50"/>
+  </entry>
+</feed>

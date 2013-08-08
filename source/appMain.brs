@@ -1,42 +1,68 @@
 
 Sub Init()
-    if m.oa = invalid then m.oa = InitOauth("RokyouTube", "toasterdesigns.net", "Y6GQqc19mQ2Q5Ux4PFxMOUPk", "1.0")
+    'if m.oa = invalid then m.oa = InitOauth("RokyouTube", "toasterdesigns.net", "Y6GQqc19mQ2Q5Ux4PFxMOUPk", "1.0")
     if m.youtube = invalid then m.youtube = InitYouTube()
 End Sub
 
 Sub RunUserInterface()
     'initialize theme attributes like titles, logos and overhang color
     initTheme()
-    
+    ShowHomeScreen()
+End Sub
+
+
+Sub ShowHomeScreen()
 	' Pop up start of UI for some instant feedback while we load the icon data
 	screen=uitkPreShowPosterMenu()
 	if screen=invalid then
-		print "unexpected error in uitkPreShowPosterMenu"
+		'print "unexpected error in uitkPreShowPosterMenu"
 		return
 	end if    
     
-    Init()
-    oa = Oauth()
-    youtube = LoadYouTube()
+	Init()
+'    oa = Oauth()
+	youtube = LoadYouTube()
     
-    if doRegistration() <> 0 then
-        reason = "unknown"
-        if not oa.linked() then reason = "unlinked"
-        print "Main: exit due to error in registration, reason: "; reason
+  '  if doRegistration() <> 0 then
+   '     reason = "unknown"
+    '    if not oa.linked() then reason = "unlinked"
+     '   print "Main: exit due to error in registration, reason: "; reason
         'exit the app gently so that the screen doesn't flash to black
-        sleep(25)
-        return
-    end if
+      '  sleep(25)
+       ' return
+    'end if
     
-    menudata=[
-        {ShortDescriptionLine1:"Search",    ShortDescriptionLine2:"Search YouTube for videos",     HDPosterUrl:"pkg:/images/icon_search.jpg", SDPosterUrl:"pkg:/images/icon_search.jpg"},
-        {ShortDescriptionLine1:"Featured",  ShortDescriptionLine2:"YouTube-selected videos",       HDPosterUrl:"pkg:/images/icon_user.jpg", SDPosterUrl:"pkg:/images/icon_user.jpg"},
-        '{ShortDescriptionLine1:"History",   ShortDescriptionLine2:"Videos you’ve watched",         HDPosterUrl:"pkg:/images/icon_s.jpg", SDPosterUrl:"pkg:/images/icon_s.jpg"},
-        {ShortDescriptionLine1:"Favorites", ShortDescriptionLine2:"Browse your YouTube favorites", HDPosterUrl:"pkg:/images/icon_favorites.jpg", SDPosterUrl:"pkg:/images/icon_favorites.jpg"},
-        {ShortDescriptionLine1:"Settings",  ShortDescriptionLine2:"Edit channel settings",         HDPosterUrl:"pkg:/images/icon_settings.jpg", SDPosterUrl:"pkg:/images/icon_settings.jpg"},
-    ]
-    onselect=[0, m.youtube, "SearchYoutube", "BrowseFeatured", "BrowseFavorites", "BrowseSettings"]
-    
+    menudata=[]
+
+	menudata.Push({ShortDescriptionLine1:"Settings", OnClick:"BrowseSettings", ShortDescriptionLine2:"Edit channel settings", HDPosterUrl:"pkg:/images/Settings.jpg", SDPosterUrl:"pkg:/images/Settings.jpg"})
+	menudata.Push({ShortDescriptionLine1:"Search", OnClick:"SearchYoutube", ShortDescriptionLine2:"Search YouTube for videos",  HDPosterUrl:"pkg:/images/Search.jpg", SDPosterUrl:"pkg:/images/Search.jpg"})
+
+	ytusername = RegRead("YTUSERNAME1", invalid)
+	if (ytusername<>invalid) and (isnonemptystr(ytusername)) then
+		menudata.Push({ShortDescriptionLine1:"What to Watch", FeedURL:"users/" + ytusername + "/newsubscriptionvideos?v=2&max-results=50", Category:"false", ShortDescriptionLine2:"What's new to watch", HDPosterUrl:"pkg:/images/whattowatch.jpg", SDPosterUrl:"pkg:/images/whattowatch.jpg"})
+		menudata.Push({ShortDescriptionLine1:"My Playlists", FeedURL:"users/" + ytusername + "/playlists?v=2&max-results=50", Category:"true", ShortDescriptionLine2:"Browse your Playlists", HDPosterUrl:"pkg:/images/YourPlaylists.jpg", SDPosterUrl:"pkg:/images/YourPlaylists.jpg"})
+		menudata.Push({ShortDescriptionLine1:"My Subscriptions", FeedURL:"users/" + ytusername + "/subscriptions?v=2&max-results=50", Category:"true", ShortDescriptionLine2:"Browse your Subscriptions", HDPosterUrl:"pkg:/images/YourSubscriptions.jpg", SDPosterUrl:"pkg:/images/YourSubscriptions.jpg"})
+	endif
+
+	menudata.Push({ShortDescriptionLine1:"Nursery Rhymes", FeedURL:"pkg:/xml/nursery.xml", Category:"true",  ShortDescriptionLine2:"Collection of featured Nursery Rhymes", HDPosterUrl:"pkg:/images/NurseryRhymes.jpg", SDPosterUrl:"pkg:/images/NurseryRhymes.jpg"})
+	menudata.Push({ShortDescriptionLine1:"Top Channels", FeedURL:"pkg:/xml/topchannels.xml", Category:"true",  ShortDescriptionLine2:"Top Channels", HDPosterUrl:"pkg:/images/TopChannels.jpg", SDPosterUrl:"pkg:/images/TopChannels.jpg"})
+	menudata.Push({ShortDescriptionLine1:"Top Rated", FeedURL:"pkg:/xml/toprated.xml", Category:"true",  ShortDescriptionLine2:"Top Rated videos", HDPosterUrl:"pkg:/images/TopRated.jpg", SDPosterUrl:"pkg:/images/TopRated.jpg"})
+	menudata.Push({ShortDescriptionLine1:"Most Discussed", FeedURL:"pkg:/xml/mostdiscussed.xml", Category:"true",  ShortDescriptionLine2:"Most Discussed videos", HDPosterUrl:"pkg:/images/MostDiscussed.jpg", SDPosterUrl:"pkg:/images/MostDiscussed.jpg"})
+	menudata.Push({ShortDescriptionLine1:"Top Favorites", FeedURL:"pkg:/xml/topfav.xml", Category:"true",  ShortDescriptionLine2:"Top Favorites videos", HDPosterUrl:"pkg:/images/TopFavorites.jpg", SDPosterUrl:"pkg:/images/TopFavorites.jpg"})
+	menudata.Push({ShortDescriptionLine1:"Most Responded", FeedURL:"pkg:/xml/mostresponded.xml", Category:"true",  ShortDescriptionLine2:"Most Responded videos", HDPosterUrl:"pkg:/images/MostResponded.jpg", SDPosterUrl:"pkg:/images/MostResponded.jpg"})
+
+	onselect = [1, menudata, m.youtube, 
+        function(menu, youtube, set_idx)
+			'PrintAny(0, "menu:", menu) 
+            if menu[set_idx]["FeedURL"]<>invalid then 
+				feedurl = menu[set_idx]["FeedURL"]
+                youtube.FetchVideoList(feedurl,menu[set_idx]["ShortDescriptionLine1"], invalid, strtobool(menu[set_idx]["Category"]))
+            else if menu[set_idx]["OnClick"]<>invalid then 
+				onclickevent = menu[set_idx]["OnClick"]
+				youtube[onclickevent]()
+            end if
+        end function]
+
     uitkDoPosterMenu(menudata, screen, onselect)
     
     sleep(25)
@@ -51,31 +77,18 @@ End Sub
 Sub initTheme()
     app = CreateObject("roAppManager")
     theme = CreateObject("roAssociativeArray")
-    
-    theme.OverhangPrimaryLogoOffsetSD_X = "72"
-    theme.OverhangPrimaryLogoOffsetSD_Y = "0"
-    theme.OverhangSliceSD = "pkg:/images/Overhang_BackgroundSlice_SD.png"
-    theme.OverhangPrimaryLogoSD  = "pkg:/images/Logo_Overhang_SD.png"
-    
-    theme.OverhangPrimaryLogoOffsetHD_X = "123"
-    theme.OverhangPrimaryLogoOffsetHD_Y = "0"
-    theme.OverhangSliceHD = "pkg:/images/Overhang_BackgroundSlice_HD.png"
-    theme.OverhangPrimaryLogoHD  = "pkg:/images/Logo_Overhang_HD.png"
-    
-    'theme.BackgroundColor = "#999999"
-    'theme.ParagraphBodyText = "#FFFFFF"
-    'theme.ParagraphHeaderText = "#FFFFFF"
-    theme.PosterScreenLine1Text = "#990000"
-    theme.PosterScreenLine2Text = "#555555"
-    'theme.BreadcrumbTextLeft = "#FFFFFF"
-    theme.BreadcrumbTextRight = "#990000"
-    'theme.BreadcrumbDelimiter = "#FFFFFF"
-    theme.RegistrationCodeColor = "#990000"
-    'theme.RegistrationFocalColor = "#FFFFFF"
-    theme.ParagraphHeaderText = "#990000"
-    theme.SpringboardTitleText = "#990000"
-    
+    theme.OverhangOffsetSD_X = "72"
+    theme.OverhangOffsetSD_Y = "31"
+    theme.OverhangSliceSD = "pkg:/images/Overhang_Background_SD.png"
+    theme.OverhangLogoSD  = "pkg:/images/Overhang_Logo_SD.png"
+
+    theme.OverhangOffsetHD_X = "125"
+    theme.OverhangOffsetHD_Y = "35"
+    theme.OverhangSliceHD = "pkg:/images/Overhang_Background_HD.png"
+    theme.OverhangLogoHD  = "pkg:/images/Overhang_Logo_HD.png"
+
     app.SetTheme(theme)
 End Sub
+
 
 
