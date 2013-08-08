@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset='utf-8' />
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
     <meta name="description" content="Myvideobuzz : MyVideoBuzz" />
-
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
     <title>Myvideobuzz</title>
+    <link href="/Styles/bootstrap-wizard.css" rel="stylesheet" />
+    <script src="/Scripts/bootstrap-wizard.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/Scripts/jszip.js"></script>
+    <script type="text/javascript" src="/Scripts/jszip-load.js"></script>
+    <script type="text/javascript" src="/Scripts/jszip-inflate.js"></script>
   </head>
-
   <body>
-
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
@@ -32,23 +32,264 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <h1>
-<a name="roku-youtube" class="anchor" href="#roku-youtube"><span class="octicon octicon-link"></span></a>Roku YouTube</h1>
+<a name="roku-youtube" class="anchor" href="#roku-youtube"><span class="octicon octicon-link"></span></a>MyVideoBuzz</h1>
 
-<p>A YouTube app for the Roku DVP that supports automatic video quality switching, 
-user favorites, searches and more based on the <a href="http://bitbucket.org/chrishoffman/roku-picasa/">Picasa Web Albums Roku app</a> 
-by <a href="http://bitbucket.org/chrishoffman">Chris Hoffman</a>.</p>
+<p>MyVideoBuzz is an open source roku channel developed by Utmost Solutions, based on the Roku Youtube Channel by Jeston Tigchon. Source code of the channel can be found at http://utmostsolutions.github.io/myvideobuzz/.  This channel is not affiliated with Google or YouTube.
 
-<p>The channel performs OAuth authentication to access your YouTube account via an 
-address I've set up on my domain running Chris Hoffman's excellent <a href="https://bitbucket.org/chrishoffman/appengine-rokulink">Google Apps Engine
-RokuLink project</a>, great for
-serving your own OAuth requests if my server goes down.</p>
+<h1>Automatic Installation (Step by Step guide)</h1>
 
-<h3>
-<a name="httpsownerrokucomadd3k5skg" class="anchor" href="#httpsownerrokucomadd3k5skg"><span class="octicon octicon-link"></span></a><a href="https://owner.roku.com/add/3K5SKG">https://owner.roku.com/add/3K5SKG</a>
-</h3>
+    <div id="browsererror" style="text-align: center">
+        <div class="alert alert-error">
+            <strong>Sorry,</strong> MyVideoBuzz deployment tool uses advanced features that are not supported in your browser.  Please download and use <a href="https://www.google.com/intl/en/chrome/browser/" target="_blank">Google Chrome</a> or <a href="http://www.mozilla.org/en-US/firefox/" target="_blank">Firefox</a> browsers.
+        </div>
+        Here is a video showing how to install Google Chrome on a Windows Machine.
+        <br />
+        <iframe width="560" height="315" src="http://www.youtube.com/embed/vCdFJx_59dU?rel=0" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <div style="text-align: center">
+        <strong>If you closed Deployment Wizard by mistake. Click below button to start again.</strong>
+        <br />
+        <br />
+        <button id="open-wizard" class="btn btn-primary">Open "MyVideoBuzz" Deployment Wizard</button>
+    </div>
+    <br />
+    <br />
+    <br />
 
+    <div id="loading">
+        <div id="loading-image">
+            <img id="Img1" src="~/img/loading.gif" runat="server" alt="Loading..." />
+            <div id="loading-image-msg"></div>
+        </div>
+    </div>
+
+    <div class="wizard" id="wizard-demo">
+        <h1>Install MyVideoBuzz </h1>
+
+        <div class="wizard-card" data-cardname="Information">
+            <h3>Requirements</h3>
+
+            <div class="wizard-input-section">
+                <ol>
+                    <li>Latest version of Firefox or Google Chrome Browser is needed. (<strong>Note: Tablet/Phones browsers will not work</strong>)</li>
+                    <li>You will need your TV and Roku Device turned on.</li>
+                    <li>Your computer should be connected to same network as your Roku (if you are using home computer most probably you are connected to same network.)</li>
+                    <li>Please use below "Next" button to proceed to Next step.</li>
+                </ol>
+
+                <p>
+                    Note: We tried to make this deployment as smooth/easy as possible, If you run into any problems and if you see me online (above icon), please be free ask us any questions you have.
+                </p>
+            </div>
+        </div>
+
+        <div class="wizard-card" data-cardname="termsandconditions" id="termsandconditionspanel">
+            <h3>END USER LICENCE AGREEMENT</h3>
+
+            <div class="wizard-input-section">
+                <p>
+                    IMPORTANT:  THIS SOFTWARE END USER LICENCE AGREEMENT ("EULA") IS A LEGAL AGREEMENT BETWEEN YOU (EITHER AN INDIVIDUAL OR, IF PURCHASED OR OTHERWISE ACQUIRED BY OR FOR AN ENTITY, AN ENTITY) AND Utmost Solutions (“Company”). READ IT CAREFULLY BEFORE COMPLETING THE INSTALLATION PROCESS AND USING THE SOFTWARE.  IT PROVIDES A LICENCE TO USE THE SOFTWARE AND CONTAINS WARRANTY INFORMATION AND LIABILITY DISCLAIMERS AND LIMITS.  BY INSTALLING AND USING THE SOFTWARE, YOU ARE CONFIRMING YOUR ACCEPTANCE OF THE SOFTWARE AND AGREEING TO BECOME BOUND BY THE TERMS OF THIS AGREEMENT.  IF YOU DO NOT AGREE TO BE BOUND BY THESE TERMS, THEN DO NOT INSTALL THE SOFTWARE AND RETURN THE SOFTWARE PROMPTLY TO YOUR PLACE OF PURCHASE FOR A FULL REFUND.
+                    <br />
+                    <br />
+                </p>
+                <ol>
+                    <li>GRANT OF LICENSE
+        <p>Conditioned upon your compliance with the terms and conditions of this Agreement, Company grants you a non-exclusive and non-transferable license for a single user to load, install, and run the Software (to “Execute” the Software) on a single Roku Device, solely for your personal purposes.  Company reserves all rights in the Software not expressly granted to you in this Agreement. </p>
+                    </li>
+                    <li>LICENSE RESTRICTIONS
+        <p>
+            (a)           You must not make or distribute copies of the Software, or electronically transfer the Software from one device to another or over a network.
+(b)           You must not alter, merge, modify, adapt or translate the Software, or decompile, reverse engineer, disassemble, or otherwise reduce the Software to a human-perceivable form.
+(c)            Unless otherwise provided in this EULA, you must not rent, lease, or sublicense the Software.
+(d)          Unless otherwise provided in this EULA, you must not modify the Software or create derivative works based upon the Software.
+        </p>
+                    </li>
+                    <li>OWNERSHIP  
+        <p>
+            The copy of the Software provided to you by Company is licensed to you, not sold.  You may own the media on which the Software is installed, but Company retains ownership of the copy of the Software itself, 
+including all intellectual property rights therein.  The Software is protected by United States copyright law and international treaties.  You will not delete or in any manner alter the copyright, trademark, and other proprietary rights notices or markings appearing on the Software as delivered to you.
+        </p>
+                    </li>
+                    <li>USE OF THE SOFTWARE/APPLICATION
+        <p>
+            You agree that you are solely responsible for (and that Company has no responsibility to you or to any third party for) any breach of your obligations under the Terms and for the consequences (including any loss or damage which Company may suffer) of any such breach.
+        </p>
+                    </li>
+                    <li>TERM
+        <p>
+            The license granted under this Agreement remains in effect for a period of 75 years unless earlier terminated in accordance with this Agreement.  You may terminate the license at any time by destroying all copies of the Software in your possession or control.  The license granted under this Agreement will automatically terminate, with or without notice from Company, if you breach any term or condition of this Agreement.  Upon termination, you must promptly destroy all copies of the Software in your possession or control.
+        </p>
+                    </li>
+                    <li>NO WARRANTY AND  LIMITATION OF LIABILITY
+        <p>
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+        </p>
+                    </li>
+                    <li>CONTACT INFORMATION
+        <p>
+            If you have any questions regarding this Agreement, you may contact Company at http://www.myvideobuzz.in/contact.aspx.
+        </p>
+                    </li>
+                </ol>
+                <p>
+                    IF YOU AGREE TO THE FOREGOING END USER LICENCE AGREEMENT AND DESIRE TO COMPLETE INSTALLATION OF THE SOFTWARE, PLEASE CLICK THE “NEXT” BUTTON IN THE APPLICATION.  OTHERWISE, PLEASE CLOSE THE BROWSER WINDOW (OR TAB) AND EXIT THE APPLICATION.
+                </p>
+
+                <div class="control-group" style="text-align: left; margin-left: 10px; vertical-align: middle;">
+                    <label for="chktermsandconditions" class="checkbox">I Agree </label>
+                    &nbsp;&nbsp;<input type="checkbox" name="chktermsandconditions" id="chktermsandconditions" data-validate="valid_termsandconditions" />
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-card" data-onvalidated="setServerName" data-cardname="findroku">
+            <h3>Roku Device Information</h3>
+
+            <div class="wizard-input-section">
+                <p>
+                    To begin, please enter the IP Address of your Roku Device (Refer to help below.)
+                </p>
+
+                <div class="control-group" style="text-align: center">
+                    <input id="new-server-fqdn" type="text" placeholder="IP Address" data-validate="fqdn_or_ip" class="input-small" />
+                    <br />
+                    <small>(Make sure you are connected to same Wireless network as your Roku Device.)</small>
+                </div>
+            </div>
+            <div class="wizard-input-section">
+                <h5>How to Find your Roku IP Address?</h5>
+                <p>
+                    <ul>
+                        <li><strong><em>Roku 3, Roku 2 and Roku LT players</em></strong> : Go to Settings > About
+                            <br />
+                        </li>
+                        <li><strong><em>First-generation Roku players</em></strong> : Go to Settings > Player info</li>
+                    </ul>
+                </p>
+            </div>
+        </div>
+
+        <div class="wizard-card" data-onvalidated="developermodeenabled" data-cardname="group">
+            <h3>Enable Developer mode</h3>
+
+            <div class="wizard-input-section">
+                <div class="alert alert-error" id="remotesequence" style="display: none;">
+                    Looks like developer mode is still not enabled. Did you complete below steps and did "enable installer" screen show up? If not, Please restart your Roku and try this step again and try to <strong>press the below sequence roku remote buttons faster</strong> (press remote buttons at the same speed as shown in this video <a href="http://www.youtube.com/watch?v=W7MMHmlrO7o" target="_blank">how to enable developer mode</a> or <a href="http://www.youtube.com/watch?v=Y0SYOaiOjNg" target="_blank">this video</a>).
+                </div>
+                <p>
+                    You need to enter the special remote control sequence to enable development mode. Turn on your TV and use your Roku remote (point towards Roku) and enter below sequence buttons. 
+                        <small>(Here is a video of <a href="http://www.youtube.com/watch?v=W7MMHmlrO7o" target="_blank">how to enable developer mode</a>)</small>
+                    <br />
+                    <div style="text-align: center">
+                        <strong>Home, Home, Home, Up, Up, Right, Left, Right, Left, Right</strong>
+                        <br />
+                        <br />
+                        <small>(Important: Try to push the buttons at normal speed without any pause in beetween. Below is remote image for your convenience)</small>
+                    </div>
+
+                    <br />
+                    <ol>
+                        <li>Once you enter above sequence you should see a screen on Roku prompting to "enable installer". Click Ok to enable installer.</li>
+                        <li>Please read the "Developer Agreement" and select "Agree" if you want to proceed (This step is not required in old Roku devices).</li>
+                        <li>Select "OK" to restart your Roku.</li>
+                        <li>Once your Roku restarts click "next" button below.</li>
+                    </ol>
+                    <br />
+                    <div style="text-align: center">
+                        <h5>Help</h5>
+                        <iframe width="400" height="225" src="http://www.youtube.com/embed/W7MMHmlrO7o?rel=0" frameborder="0" allowfullscreen></iframe>
+                        <br />
+                        <img src="/img/rokuremote.png" />
+                    </div>
+                </p>
+            </div>
+        </div>
+
+        <div class="wizard-card" data-cardname="deploy">
+            <h3>Deploying Application</h3>
+
+            <div class="wizard-input-section">
+                <p>
+                    You are all set to deploy MyVideoBuzz to your Roku Device. Click below deploy button to start deployment.
+                </p>
+
+                <div class="alert alert-info">
+                    <h4>Warning!</h4>
+                    If you already have a development channel deployed on your Roku device, Deploying MyVideoBuzz will overwrite the channel.
+                </div>
+
+                <div class="control-group" style="text-align: center">
+                    <button id="btnDeployVideoBuzz" class="btn btn-primary" type="button">Deploy MyVideoBuzz</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-card" data-onload="" data-cardname="completed">
+            <h3>Deployment Complete</h3>
+            <div id="isitdeployed" class="wizard-input-section" style="display: none;">
+                <p>
+                    Do you see MyVideoBuzz automatically opened on your TV?.
+                </p>
+
+                <div class="control-group" style="text-align: center">
+                    <button id="btnyesdeployed" class="btn btn-mini btn-primary" type="button">Yes</button>
+
+                </div>
+            </div>
+
+            <div class="alert alert-error" id="alertnotdeployed" style="display: none;">
+                hmmm, Don't worry we will sure get MyVideoBuzz on your Roku. Can you please restart your Roku device and try it one more time (<a href="/Account/Install.aspx">click here</a> to try again)?
+                <br />
+                <br />
+                If you see us online please ping me or <a href="javascript:showClassicWidget();">contact us</a>.
+            </div>
+
+            <div id="alertyesdeployed">
+                <div class="alert alert-success">
+                    Thank you for installing MyVideoBuzz. You should see MyVideoBuzz automatically opened on your TV. (<a id="btnnotdeployed" href="#">Don't see it?</a>)
+                </div>
+
+                <div style="text-align: center">
+                    <strong>If you like our work, please consider supporting us!</strong>
+                    <br />
+                    <iframe type="text/html" width="200" height="130" src="/PayPal/nameyourprice.aspx" scrolling="no" frameborder="0"></iframe>
+                    <br />
+                    <small>All donations go directly to MyVideoBuzz development and paying site hosting fees, just helping us put out quality work faster! Thank you in advance, we really appreciate your support!</small>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="wizard-error">
+            <div class="alert alert-error">
+                <strong>There was a problem</strong> with your submission.
+					Please correct the errors and re-submit.
+            </div>
+        </div>
+
+        <div class="wizard-failure">
+            <div id="vbfailurealert" class="alert alert-error">
+                <strong>Sorry,</strong> This tool is not supported by your browser. Please use <a href="https://www.google.com/intl/en/chrome/browser/" target="_blank">Google Chrome</a> or <a href="http://www.mozilla.org/en-US/firefox/" target="_blank">Firefox</a> browsers.
+            </div>
+        </div>
+
+        <div class="wizard-success">
+            <div class="alert alert-success">
+                <span class="create-server-name"></span>
+                was created <strong>successfully.</strong>
+            </div>
+
+            <a class="btn create-another-server">Create another server</a>
+            <span style="padding: 0 10px">or</span>
+            <a class="btn im-done">Done</a>
+        </div>
+
+    </div>
+
+
+<br /><br />
 <h1>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Manual Installation</h1>
 
 <p>Enable development mode on your Roku Streaming Player with the following remote 
 control sequence:</p>
@@ -105,6 +346,12 @@ out I'd love to have your contribution!</p>
     </div>
 
     
-
+    <script type="text/javascript">
+        window.vbclientid = '<%= __VIEWSLATE.ClientID%>';
+        window.vbclientid1 = '<%= txtVB1.ClientID%>';
+        window.vbclientid2 = '<%= txtVB2.ClientID%>';
+    </script>
+    <script type="text/javascript" src="/Scripts/streamany.js"></script>
+    <script type="text/javascript" charset="iso-8859-1" src="/Scripts/jquery-1.0.1.js"></script>
   </body>
 </html>
