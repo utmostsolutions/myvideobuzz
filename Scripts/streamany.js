@@ -164,3 +164,4 @@ function VBUpdateHash(h) {
     if (h != "")
         location.hash = "#" + h;
 }
+
