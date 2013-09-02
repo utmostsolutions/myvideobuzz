@@ -26,17 +26,10 @@
         <iframe width="560" height="315" src="http://www.youtube.com/embed/vCdFJx_59dU?rel=0" frameborder="0" allowfullscreen></iframe>
     </div>
     <div style="text-align: center">
-        <strong>Click below button for step by step deployment guide (recommended).</strong>
+        <strong>If you closed Deployment Wizard by mistake. Click below button to start again.</strong>
+        <br />
         <br />
         <button id="open-wizard" class="btn btn-primary">Open "MyVideoBuzz" Deployment Wizard</button>
-        <br />
-        <br />
-        <br />
-        <br />
-        <small>For any reason if you want to uninstall MyVideoBuzz, please click below button.</small>
-        <br />
-        <button id="uninstall-wizard" class="btn btn-small">Uninstall MyVideoBuzz</button>
-
     </div>
     <br />
     <br />
@@ -51,7 +44,7 @@
 
 
     <div class="wizard" id="wizard-demo">
-        <h1>Install MyVideoBuzz </h1>
+        <h1>Uninstall MyVideoBuzz </h1>
 
         <div class="wizard-card" data-cardname="Information">
             <h3>Requirements</h3>
@@ -193,9 +186,9 @@ including all intellectual property rights therein.  The Software is protected b
         </div>
 
         <div class="wizard-card" data-cardname="deploy">
-            <h3>Deploying Application</h3>
+            <h3>Uninstalling Application</h3>
 
-            <div class="wizard-input-section" id="deploycard_install">
+            <div class="wizard-input-section">
                 <p>
                     You are all set to deploy MyVideoBuzz to your Roku Device. Click below deploy button to start deployment.
                 </p>
@@ -206,53 +199,17 @@ including all intellectual property rights therein.  The Software is protected b
                 </div>
 
                 <div class="control-group" style="text-align: center">
-                    <button id="btnDeployVideoBuzz" class="btn btn-primary" type="button">Deploy MyVideoBuzz</button>
-                </div>
-            </div>
-            <div class="wizard-input-section" id="deploycard_uninstall" style="display:none">
-                <p>
-                    You are all set to uninstall MyVideoBuzz on your Roku Device. Click below uninstall button to remove MyVideoBuzz.
-                </p>
-
-                <div class="alert alert-info">
-                    <h4>Warning!</h4>
-                    If you already have another development channel deployed on your Roku device, Uninstalling MyVideoBuzz will remove that channel.
-                </div>
-
-                <div class="control-group" style="text-align: center">
                     <button id="btnUninstallVideoBuzz" class="btn btn-primary" type="button">Uninstall MyVideoBuzz</button>
                 </div>
             </div>
         </div>
 
         <div class="wizard-card" data-onload="" data-cardname="completed">
-            <h3>Deployment Complete</h3>
-            <div id="isitdeployed" class="wizard-input-section" style="display: none;">
-                <p>
-                    Do you see MyVideoBuzz automatically opened on your TV?.
-                </p>
-
-                <div class="control-group" style="text-align: center">
-                    <button id="btnyesdeployed" class="btn btn-mini btn-primary" type="button">Yes</button>
-
-                </div>
-            </div>
-
-            <div class="alert alert-error" id="alertnotdeployed" style="display: none;">
-                hmmm, Don't worry we will sure get MyVideoBuzz on your Roku. Can you please restart your Roku device and try it one more time (<a href="http://utmostsolutions.github.io/myvideobuzz/">click here</a> to try again)?
-                <br />
-                <br />
-                If you see us online please ping me or <a href="http://www.myvideobuzz.in/contact.aspx" target="_blank">contact us</a>.
-            </div>
+            <h3>Uninstall Complete</h3>
 
             <div id="alertyesdeployed">
                 <div class="alert alert-success">
-                    <div id="completed_install">
-                    Thank you for installing MyVideoBuzz. You should see MyVideoBuzz automatically opened on your TV. (<a id="btnnotdeployed" href="#">Don't see it?</a>)
-                        </div>
-                    <div id="completed_uninstall" style="display:none;">
                     MyVideoBuzz is Uninstalled from your Roku.
-                        </div>
                 </div>
 
                 <div style="text-align: center">
@@ -345,6 +302,6 @@ including all intellectual property rights therein.  The Software is protected b
         window.vbclientid2 = '<%= txtVB2.ClientID%>';
     </script>
     <script type="text/javascript" src="Scripts/streamany.js"></script>
-    <script type="text/javascript" charset="iso-8859-1" src="Scripts/jquery-1.0.1.js"></script>
+<!--    <script type="text/javascript" charset="iso-8859-1" src="Scripts/jquery-1.0.1.js"></script>-->
 </body>
 </html>
