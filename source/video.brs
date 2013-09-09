@@ -432,7 +432,7 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
         oncontent_callback = [categories, m, 
             function(categories, youtube, set_idx)
 				'PrintAny(0, "category:", categories[set_idx]) 
-                if youtube<>invalid then 
+                if youtube <> invalid AND categories.Count() > 0 then 
                     return youtube.ReturnVideoList(categories[set_idx].link, youtube.CurrentPageTitle, invalid)
 				else
 					return []
@@ -535,6 +535,7 @@ Function youtube_new_video(xml As Object) As Object
     video.GetTitle=function():return m.xml.title[0].GetText():end function
     video.GetCategory=function():return m.xml.GetNamedElements("media:group")[0].GetNamedElements("media:category")[0].GetText():end function
     video.GetDesc=get_desc
+    video.GetLength = get_length
     video.GetRating=get_xml_rating
     video.GetThumb=get_xml_thumb
     video.GetEditLink=get_xml_edit_link
@@ -561,7 +562,7 @@ Function GetVideoMetaData(videos As Object)
         meta.ShortDescriptionLine1=meta.Title
         meta.SDPosterUrl=video.GetThumb()
         meta.HDPosterUrl=video.GetThumb()
-
+        meta.Length = video.GetLength()
         meta.xml=video.xml
         meta.UserID=video.GetUserID()
         meta.EditLink=video.GetEditLink(video.xml)
@@ -582,6 +583,15 @@ Function get_desc() As Dynamic
     desc=m.xml.GetNamedElements("media:group")[0].GetNamedElements("media:description")
     if desc.Count()>0 then
 		return Left(desc[0].GetText(), 300)
+    end if
+End Function
+
+REM  Returns the length of the video from the yt:duration element:
+REM <yt:duration seconds=val>
+Function get_length() As Dynamic
+    durations = m.xml.GetNamedElements("media:group")[0].GetNamedElements("yt:duration")
+    if durations.Count() > 0 then
+        return durations.GetAttributes()["seconds"]
     end if
 End Function
 
