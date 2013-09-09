@@ -376,9 +376,15 @@ Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As
     screen=uitkPreShowPosterMenu("flat-episodic-16x9", title)
     screen.showMessage("Loading...")
 
-    xml=m.ExecServerAPI(APIRequest, username)["xml"]
-    if not isxmlelement(xml) then ShowConnectionFailed():return
+    response = m.ExecServerAPI(APIRequest, username)
+    if response.status = 403 then
+        ShowErrorDialog(title + " may be private", "403 Forbidden")
+        return
+    end if
+    if not isxmlelement(response.xml) then ShowConnectionFailed():return
     
+    ' Everything is OK, display the list
+    xml = response.xml
 	if categories = true then
 		categories=m.CategoriesListFromXML(xml.entry)
 		'PrintAny(0, "categoryList:", categories) 
