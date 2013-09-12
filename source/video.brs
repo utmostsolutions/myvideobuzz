@@ -39,11 +39,11 @@ Function InitYouTube() As Object
     'User videos
     this.BrowseUserVideos = youtube_user_videos
 
-	'related
-	this.ShowRelatedVideos = youtube_related_videos
+    'related
+    this.ShowRelatedVideos = youtube_related_videos
 
-	'Play All
-	this.PlayAllVideos = youtube_playall_videos
+    'Play All
+    this.PlayAllVideos = youtube_playall_videos
 
     'Videos
     this.DisplayVideoList = youtube_display_video_list
@@ -51,10 +51,10 @@ Function InitYouTube() As Object
     this.VideoDetails = youtube_display_video_springboard
     this.newVideoListFromXML = youtube_new_video_list
     this.newVideoFromXML = youtube_new_video
-	this.ReturnVideoList = youtube_return_video
+    this.ReturnVideoList = youtube_return_video
 
-	'Categories
-	this.CategoriesListFromXML  = youtube_new_video_cat_list
+    'Categories
+    this.CategoriesListFromXML  = youtube_new_video_cat_list
 
     this.UpdateButtons = update_buttons
 
@@ -62,7 +62,7 @@ Function InitYouTube() As Object
     this.BrowseSettings = youtube_browse_settings
     this.DelinkPlayer = youtube_delink
     this.About = youtube_about 
-	this.AddAccount = youtube_add_account
+    this.AddAccount = youtube_add_account
     
     'print "YouTube: init complete"
     return this
@@ -104,9 +104,9 @@ Function youtube_exec_api(request As Dynamic, username="default" As Dynamic) As 
     'oa.sign(http,true)
 
     'print "----------------------------------"
-	if Instr(1, request, "pkg:/") > 0 then 
-		rsp = ReadAsciiFile(request)
-	else if postdata<>invalid then
+    if Instr(1, request, "pkg:/") > 0 then 
+        rsp = ReadAsciiFile(request)
+    else if postdata<>invalid then
         rsp=http.PostFromStringWithTimeout(postdata, 10, headers)
         'print "postdata:",postdata
     else
@@ -123,9 +123,9 @@ Function youtube_exec_api(request As Dynamic, username="default" As Dynamic) As 
     returnObj = CreateObject("roAssociativeArray")
     returnObj.xml = xml
     returnObj.status = http.status
-	if Instr(1, request, "pkg:/") < 0 then 
-		returnObj.error = handleYoutubeError(returnObj)
-	end if
+    if Instr(1, request, "pkg:/") < 0 then 
+        returnObj.error = handleYoutubeError(returnObj)
+    end if
 
     return returnObj
 End Function
@@ -183,9 +183,9 @@ Sub youtube_search()
             if msg.isScreenClosed() then
                 return
            else if msg.isPartialResult()
-				screen.SetSearchTermHeaderText("Suggestions:")
-				screen.SetClearButtonEnabled(false)
-				screen.SetSearchTerms(GenerateSearchSuggestions(msg.GetMessage()))
+                screen.SetSearchTermHeaderText("Suggestions:")
+                screen.SetClearButtonEnabled(false)
+                screen.SetSearchTerms(GenerateSearchSuggestions(msg.GetMessage()))
             else if msg.isFullResult()
                 keyword=msg.GetMessage()
                 dialog=ShowPleaseWait("Please wait","Searching YouTube for "+Quote()+keyword+Quote())
@@ -211,25 +211,25 @@ End Sub
 Function GenerateSearchSuggestions(partSearchText As String) As Object
     suggestions = CreateObject("roArray", 1, true) 
     length = len(partSearchText)
-	if length > 0 then
-		searchRequest = CreateObject("roUrlTransfer")
-		searchRequest.SetURL("http://suggestqueries.google.com/complete/search?hl=en&client=youtube&hjson=t&ds=yt&jsonp=window.yt.www.suggest.handleResponse&q=" + URLEncode(partSearchText))
-		jsonAsString = searchRequest.GetToString() 
-		jsonAsString = strReplace(jsonAsString,"window.yt.www.suggest.handleResponse(","")
+    if length > 0 then
+        searchRequest = CreateObject("roUrlTransfer")
+        searchRequest.SetURL("http://suggestqueries.google.com/complete/search?hl=en&client=youtube&hjson=t&ds=yt&jsonp=window.yt.www.suggest.handleResponse&q=" + URLEncode(partSearchText))
+        jsonAsString = searchRequest.GetToString() 
+        jsonAsString = strReplace(jsonAsString,"window.yt.www.suggest.handleResponse(","")
         jsonAsString = Left(jsonAsString, Len(jsonAsString) -1)
-		response = simpleJSONParser(jsonAsString) 
+        response = simpleJSONParser(jsonAsString) 
 
-		if islist(response) = true
-			if response.Count() > 1
-				for each sugg in response[1]
-						suggestions.Push(sugg[0])
-				end for
-			endif
-		endif
+        if islist(response) = true
+            if response.Count() > 1
+                for each sugg in response[1]
+                        suggestions.Push(sugg[0])
+                end for
+            endif
+        endif
 
     else
-		history=CreateObject("roSearchHistory")
-		suggestions = history.GetAsArray()
+        history=CreateObject("roSearchHistory")
+        suggestions = history.GetAsArray()
     endif 
     return suggestions
 End Function
@@ -322,7 +322,7 @@ REM ********************************************************************
 REM ********************************************************************
 Sub youtube_featured()
     'm.FetchVideoList("standardfeeds/recently_featured", "Featured", invalid)
-	m.FetchVideoList("users/vvarkala/playlists?v=2&max-results=50", "Featured", invalid, true)
+    m.FetchVideoList("users/vvarkala/playlists?v=2&max-results=50", "Featured", invalid, true)
 End Sub
 
 
@@ -345,7 +345,7 @@ REM ********************************************************************
 REM ********************************************************************
 Sub youtube_related_videos(video As Object)
     m.FetchVideoList("videos/"+ video.id +"/related?v=2", "Related Videos", invalid)
-	'GetYTBase("videos/" + showList[showIndex].ContentId + "/related?v=2&start-index=1&max-results=50"))
+    'GetYTBase("videos/" + showList[showIndex].ContentId + "/related?v=2&start-index=1&max-results=50"))
 End Sub
 
 REM ********************************************************************
@@ -385,38 +385,38 @@ Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As
     
     ' Everything is OK, display the list
     xml = response.xml
-	if categories = true then
-		categories=m.CategoriesListFromXML(xml.entry)
-		'PrintAny(0, "categoryList:", categories) 
-		m.DisplayVideoList([], title, xml.link, screen, categories)
-	else
-		videos=m.newVideoListFromXML(xml.entry)
-		m.DisplayVideoList(videos, title, xml.link, screen)
-	end if
+    if categories = true then
+        categories=m.CategoriesListFromXML(xml.entry)
+        'PrintAny(0, "categoryList:", categories) 
+        m.DisplayVideoList([], title, xml.link, screen, categories)
+    else
+        videos=m.newVideoListFromXML(xml.entry)
+        m.DisplayVideoList(videos, title, xml.link, screen)
+    end if
 End Sub
 
 
 Function youtube_return_video(APIRequest As Dynamic, title As String, username As Dynamic)
     xml=m.ExecServerAPI(APIRequest, username)["xml"]
     if not isxmlelement(xml) then 
-		ShowConnectionFailed() 
-		return []
-	end if
+        ShowConnectionFailed() 
+        return []
+    end if
 
-	videos = m.newVideoListFromXML(xml.entry)
-	metadata=GetVideoMetaData(videos)
+    videos = m.newVideoListFromXML(xml.entry)
+    metadata=GetVideoMetaData(videos)
 
-	if xml.link<>invalid then
-		for each link in xml.link
-			if link@rel = "next" then 
-				metadata.Push({shortDescriptionLine1: "More Results", action: "next", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_next_episode.jpg", SDPosterUrl:"pkg:/images/icon_next_episode.jpg"})
-			else if link@rel = "previous" then 
-				metadata.Unshift({shortDescriptionLine1: "Back", action: "prev", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_prev_episode.jpg", SDPosterUrl:"pkg:/images/icon_prev_episode.jpg"})
-			end if
-		end for
-	end if
+    if xml.link<>invalid then
+        for each link in xml.link
+            if link@rel = "next" then 
+                metadata.Push({shortDescriptionLine1: "More Results", action: "next", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_next_episode.jpg", SDPosterUrl:"pkg:/images/icon_next_episode.jpg"})
+            else if link@rel = "previous" then 
+                metadata.Unshift({shortDescriptionLine1: "Back", action: "prev", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_prev_episode.jpg", SDPosterUrl:"pkg:/images/icon_prev_episode.jpg"})
+            end if
+        end for
+    end if
 
-	return metadata
+    return metadata
 End Function
 
 Sub youtube_display_video_list(videos As Object, title As String, links=invalid, screen=invalid, categories=invalid)
@@ -426,22 +426,22 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
     end if
     m.CurrentPageTitle = title
 
-	'content_callback=[ff_data, m, function(ff_data, smugmug, cat_idx):return smugmug.getFFMetaData(ff_data[cat_idx]):end function]
-	'onclick_callback=[ff_data, m, function(ff_data, smugmug, cat_idx, set_idx):smugmug.DisplayFriendsFamily(ff_data[cat_idx][set_idx]):end function]
+    'content_callback=[ff_data, m, function(ff_data, smugmug, cat_idx):return smugmug.getFFMetaData(ff_data[cat_idx]):end function]
+    'onclick_callback=[ff_data, m, function(ff_data, smugmug, cat_idx, set_idx):smugmug.DisplayFriendsFamily(ff_data[cat_idx][set_idx]):end function]
     
-	if categories<>invalid then
-		categoryList = CreateObject("roArray", 100, true)
-		for each category in categories
-			categoryList.Push(category.title)
-		next
+    if categories<>invalid then
+        categoryList = CreateObject("roArray", 100, true)
+        for each category in categories
+            categoryList.Push(category.title)
+        next
 
         oncontent_callback = [categories, m, 
             function(categories, youtube, set_idx)
-				'PrintAny(0, "category:", categories[set_idx]) 
+                'PrintAny(0, "category:", categories[set_idx]) 
                 if youtube <> invalid AND categories.Count() > 0 then 
                     return youtube.ReturnVideoList(categories[set_idx].link, youtube.CurrentPageTitle, invalid)
-				else
-					return []
+                else
+                    return []
                 end if
             end function]
 
@@ -452,11 +452,11 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
                     return youtube.ReturnVideoList(video[set_idx]["pageURL"], youtube.CurrentPageTitle, invalid)
                 else
                     youtube.VideoDetails(video[set_idx], youtube.CurrentPageTitle, video, set_idx)
-					return video
+                    return video
                 end if
             end function]
 
-		uitkDoCategoryMenu(categoryList, screen, oncontent_callback, onclick_callback)
+        uitkDoCategoryMenu(categoryList, screen, oncontent_callback, onclick_callback)
     else if videos.Count() > 0 then
         metadata=GetVideoMetaData(videos)
 
@@ -493,21 +493,21 @@ Function youtube_new_video_cat_list(xmllist As Object) As Object
     'print "youtube_new_video_cat_list init"
     categoryList  = CreateObject("roList")
     for each record in xmllist
-		''printAny(0, "xmllist:", record) 
-		category  = CreateObject("roAssociativeArray")
+        ''printAny(0, "xmllist:", record) 
+        category  = CreateObject("roAssociativeArray")
         category.title = record.GetNamedElements("title")[0].GetText()
-		category.link= validstr(record.content@src)
+        category.link= validstr(record.content@src)
 
-		if isnullorempty(category.link) then
-			links = record.link
-			for each link in links
-				if Instr(1, link@rel, "user.uploads") > 0 then 
-					category.link = validstr(link@href) + "&max-results=50"
-				endif
-			next
-		end if
+        if isnullorempty(category.link) then
+            links = record.link
+            for each link in links
+                if Instr(1, link@rel, "user.uploads") > 0 then 
+                    category.link = validstr(link@href) + "&max-results=50"
+                endif
+            next
+        end if
 
-		categoryList.Push(category)
+        categoryList.Push(category)
     next
     return categoryList
 End Function
@@ -588,7 +588,7 @@ End Function
 Function get_desc() As Dynamic
     desc=m.xml.GetNamedElements("media:group")[0].GetNamedElements("media:description")
     if desc.Count()>0 then
-		return Left(desc[0].GetText(), 300)
+        return Left(desc[0].GetText(), 300)
     end if
 End Function
 
@@ -653,7 +653,7 @@ Sub youtube_display_video_springboard(video As Object, breadcrumb As String, vid
     screen.SetMessagePort(p)
     m.screen=screen
     m.video=video
-	''printAny(0, "videos:", videos)
+    ''printAny(0, "videos:", videos)
     screen.SetDescriptionStyle("movie")
     screen.AllowNavLeft(true)
     screen.AllowNavRight(true)
@@ -663,9 +663,9 @@ Sub youtube_display_video_springboard(video As Object, breadcrumb As String, vid
 
     buttons = CreateObject("roAssociativeArray")
 
-	buttons["play"] = screen.AddButton(0, "Play")
-	buttons["play_all"] = screen.AddButton(1, "Play All")
-	buttons["show_related"] = screen.AddButton(2, "Show Related Videos")
+    buttons["play"] = screen.AddButton(0, "Play")
+    buttons["play_all"] = screen.AddButton(1, "Play All")
+    buttons["show_related"] = screen.AddButton(2, "Show Related Videos")
     buttons["more"] = screen.AddButton(3, "More Videos By "+ video.Author)
 
     if video.EditLink<>invalid then 
@@ -688,21 +688,21 @@ Sub youtube_display_video_springboard(video As Object, breadcrumb As String, vid
                 if msg.GetIndex() = 0 then
                     DisplayVideo(video)
                 else if msg.GetIndex() = 1 then
-					for i=idx to videos.Count()-1  Step +1
-						selectedVideo = videos[i]
-						'print "Play ALL Index"
-						'print i
-					    'printAny(0, "Play All video:", selectedVideo)
+                    for i=idx to videos.Count()-1  Step +1
+                        selectedVideo = videos[i]
+                        'print "Play ALL Index"
+                        'print i
+                        'printAny(0, "Play All video:", selectedVideo)
 
-						streamQualities = video_get_qualities(selectedVideo.id)
-						if streamQualities<>invalid
-							selectedVideo.Streams = streamQualities
-							ret = DisplayVideo(selectedVideo)
-							if(ret > 0) then
-								Exit For
-							endif
-						end if
-					end for
+                        streamQualities = video_get_qualities(selectedVideo.id)
+                        if streamQualities<>invalid
+                            selectedVideo.Streams = streamQualities
+                            ret = DisplayVideo(selectedVideo)
+                            if(ret > 0) then
+                                Exit For
+                            endif
+                        end if
+                    end for
                 else if msg.GetIndex() = 2 then
                     m.ShowRelatedVideos(video)
                 else if msg.GetIndex() = 3 then
@@ -741,33 +741,33 @@ Function DisplayVideo(content As Object)
     video = CreateObject("roVideoScreen")
     video.setMessagePort(p)
 
-	mp4VideoList = getVideoUrl(content.id, 0, "")
-	''printAA(mp4VideoList)
-	'printAny(0, "content:", content) 
-	if mp4VideoList <> Invalid
-		if not(isnullorempty(mp4VideoList.hdUrl))
-			content.HDBranded = true
-			content.IsHD = true
-			content.FullHD = true
-			content.Streams.Push({url: mp4VideoList.hdUrl, bitrate: 0, quality: true})
-		elseif not(isnullorempty(mp4VideoList.hd1080pUrl))
-			content.HDBranded = true
-			content.IsHD = true
-			content.FullHD = true
-			content.Streams.Push({url: mp4VideoList.hd1080pUrl, bitrate: 0, quality: true})
-		endif
-		if not(isnullorempty(mp4VideoList.sdUrl))
-			content.HDBranded = false
-			content.IsHD = false
-			content.FullHD = false
-			content.Streams.Push({url: mp4VideoList.sdUrl, bitrate: 0, quality: false})
-		endif
-	else
-		problem = ShowDialogNoButton("", "Having trouble finding YouTube's video formats map...")
-		sleep(3000)
-		problem.Close()
-		return -1
-	endif
+    mp4VideoList = getVideoUrl(content.id, 0, "")
+    ''printAA(mp4VideoList)
+    'printAny(0, "content:", content) 
+    if mp4VideoList <> Invalid
+        if not(isnullorempty(mp4VideoList.hdUrl))
+            content.HDBranded = true
+            content.IsHD = true
+            content.FullHD = true
+            content.Streams.Push({url: mp4VideoList.hdUrl, bitrate: 0, quality: true})
+        elseif not(isnullorempty(mp4VideoList.hd1080pUrl))
+            content.HDBranded = true
+            content.IsHD = true
+            content.FullHD = true
+            content.Streams.Push({url: mp4VideoList.hd1080pUrl, bitrate: 0, quality: true})
+        endif
+        if not(isnullorempty(mp4VideoList.sdUrl))
+            content.HDBranded = false
+            content.IsHD = false
+            content.FullHD = false
+            content.Streams.Push({url: mp4VideoList.sdUrl, bitrate: 0, quality: false})
+        endif
+    else
+        problem = ShowDialogNoButton("", "Having trouble finding YouTube's video formats map...")
+        sleep(3000)
+        problem.Close()
+        return -1
+    endif
 
     video.SetContent(content)
     video.show()
@@ -775,9 +775,9 @@ Function DisplayVideo(content As Object)
     while true
         msg = wait(0, video.GetMessagePort())
         if type(msg) = "roVideoScreenEvent"
-			if Instr(1, msg.getMessage(), "interrupted") > 0 then 
-				ret = 1
-			endif
+            if Instr(1, msg.getMessage(), "interrupted") > 0 then 
+                ret = 1
+            endif
             if msg.isScreenClosed() then 'ScreenClosed event
                 'print "Closing video screen"
                 video.Close()
@@ -789,7 +789,7 @@ Function DisplayVideo(content As Object)
             end if
         end if
     end while
-	return ret
+    return ret
 End Function
 
 
@@ -928,13 +928,13 @@ function getVideoUrl (videoIdOrUrl as string, timeout = 0 as integer, loginCooki
       end for
    endif
    if mp4VideoList.sdUrl = "" and mp4VideoList.hdUrl = "" and mp4VideoList.hd1080pUrl = ""
-	 if mp4VideoList.fallback1 <> ""
-		mp4VideoList.sdUrl = mp4VideoList.fallback1
-	 else if mp4VideoList.fallback2 <> ""
-		mp4VideoList.sdUrl = mp4VideoList.fallback2
-	 else
-		mp4VideoList = Invalid
-	  endif 
+     if mp4VideoList.fallback1 <> ""
+        mp4VideoList.sdUrl = mp4VideoList.fallback1
+     else if mp4VideoList.fallback2 <> ""
+        mp4VideoList.sdUrl = mp4VideoList.fallback2
+     else
+        mp4VideoList = Invalid
+      endif 
    endif
    return mp4VideoList
 end function
@@ -986,9 +986,9 @@ function getMP4Url (videoIdOrUrl as string, timeout = 0 as integer, loginCookie 
             if pair.sig <> "" then signature = "&signature=" + pair.sig else signature = ""
             urlDecoded = ut.Unescape (ut.Unescape (pair.url + signature))
             if pair.itag = "18"
-			   streamQualities.Push({url: urlDecoded, bitrate: 0, quality: false, contentid: pair.itag})
+               streamQualities.Push({url: urlDecoded, bitrate: 0, quality: false, contentid: pair.itag})
             else if pair.itag = "22"
-				streamQualities.Push({url: urlDecoded, bitrate: 0, quality: true, contentid: pair.itag})
+                streamQualities.Push({url: urlDecoded, bitrate: 0, quality: true, contentid: pair.itag})
             else if pair.itag = "37"
                streamQualities.Push({url: urlDecoded, bitrate: 0, quality: true, contentid: pair.itag })
             else if pair.itag = "36"
@@ -1007,21 +1007,21 @@ end function
 Function video_get_qualities(videoID as String) As Object
 
     videoFormats = getMP4Url(videoID)
-	if videoFormats.Count()>0 then
-		hdvideo = []
+    if videoFormats.Count()>0 then
+        hdvideo = []
          for each video in videoFormats
             if video.contentid = "22" then
                hdvideo.push(video)
             endif
          end for
-		return videoFormats
+        return videoFormats
     else
         'ShowErrorDialog("Having trouble finding YouTube's video formats map...")
-		problem = ShowDialogNoButton("", "Having trouble finding YouTube's video formats map...")
-		sleep(3000)
-		problem.Close()
+        problem = ShowDialogNoButton("", "Having trouble finding YouTube's video formats map...")
+        sleep(3000)
+        problem.Close()
     end if
-	return invalid
+    return invalid
 
 
     'http = NewHttp("http://www.youtube.com/watch?v="+videoID)
