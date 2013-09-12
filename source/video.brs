@@ -386,11 +386,11 @@ Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As
     ' Everything is OK, display the list
     xml = response.xml
     if categories = true then
-        categories=m.CategoriesListFromXML(xml.entry)
+        categories = m.CategoriesListFromXML(xml.entry)
         'PrintAny(0, "categoryList:", categories) 
         m.DisplayVideoList([], title, xml.link, screen, categories)
     else
-        videos=m.newVideoListFromXML(xml.entry)
+        videos = m.newVideoListFromXML(xml.entry)
         m.DisplayVideoList(videos, title, xml.link, screen)
     end if
 End Sub
@@ -404,7 +404,7 @@ Function youtube_return_video(APIRequest As Dynamic, title As String, username A
     end if
 
     videos = m.newVideoListFromXML(xml.entry)
-    metadata=GetVideoMetaData(videos)
+    metadata = GetVideoMetaData(videos)
 
     if xml.link<>invalid then
         for each link in xml.link
@@ -420,7 +420,7 @@ Function youtube_return_video(APIRequest As Dynamic, title As String, username A
 End Function
 
 Sub youtube_display_video_list(videos As Object, title As String, links=invalid, screen=invalid, categories=invalid)
-    if screen=invalid then
+    if screen = invalid then
         screen=uitkPreShowPosterMenu("flat-episodic-16x9", title)
         screen.showMessage("Loading...")
     end if
@@ -429,7 +429,7 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
     'content_callback=[ff_data, m, function(ff_data, smugmug, cat_idx):return smugmug.getFFMetaData(ff_data[cat_idx]):end function]
     'onclick_callback=[ff_data, m, function(ff_data, smugmug, cat_idx, set_idx):smugmug.DisplayFriendsFamily(ff_data[cat_idx][set_idx]):end function]
     
-    if categories<>invalid then
+    if categories <> invalid then
         categoryList = CreateObject("roArray", 100, true)
         for each category in categories
             categoryList.Push(category.title)
@@ -458,7 +458,7 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
 
         uitkDoCategoryMenu(categoryList, screen, oncontent_callback, onclick_callback)
     else if videos.Count() > 0 then
-        metadata=GetVideoMetaData(videos)
+        metadata = GetVideoMetaData(videos)
 
         for each link in links
             if link@rel = "next" then 
@@ -470,7 +470,7 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
         
         onselect = [1, metadata, m, 
             function(video, youtube, set_idx)
-                if video[set_idx]["action"]<>invalid then 
+                if video[set_idx]["action"] <> invalid then 
                     youtube.FetchVideoList(video[set_idx]["pageURL"], youtube.CurrentPageTitle, invalid)
                 else
                     youtube.VideoDetails(video[set_idx], youtube.CurrentPageTitle, video, set_idx)
@@ -532,21 +532,21 @@ End Function
 
 
 Function youtube_new_video(xml As Object) As Object
-    video = CreateObject("roAssociativeArray")
-    video.youtube=m
-    video.xml=xml
-    video.GetID=function():return m.xml.GetNamedElements("media:group")[0].GetNamedElements("yt:videoid")[0].GetText():end function
-    video.GetAuthor=get_xml_author
-    video.GetUserID=function():return m.xml.GetNamedElements("media:group")[0].GetNamedElements("yt:uploaderId")[0].GetText():end function
-    video.GetTitle=function():return m.xml.title[0].GetText():end function
-    video.GetCategory=function():return m.xml.GetNamedElements("media:group")[0].GetNamedElements("media:category")[0].GetText():end function
-    video.GetDesc=get_desc
-    video.GetLength = get_length
-    video.GetRating=get_xml_rating
-    video.GetThumb=get_xml_thumb
-    video.GetEditLink=get_xml_edit_link
-    'video.GetLinks=function():return m.xml.GetNamedElements("link"):end function
-    'video.GetURL=video_get_url
+    video               = CreateObject("roAssociativeArray")
+    video.youtube       = m
+    video.xml           = xml
+    video.GetID         = function():return m.xml.GetNamedElements("media:group")[0].GetNamedElements("yt:videoid")[0].GetText():end function
+    video.GetAuthor     = get_xml_author
+    video.GetUserID     = function():return m.xml.GetNamedElements("media:group")[0].GetNamedElements("yt:uploaderId")[0].GetText():end function
+    video.GetTitle      = function():return m.xml.title[0].GetText():end function
+    video.GetCategory   = function():return m.xml.GetNamedElements("media:group")[0].GetNamedElements("media:category")[0].GetText():end function
+    video.GetDesc       = get_desc
+    video.GetLength     = get_length
+    video.GetRating     = get_xml_rating
+    video.GetThumb      = get_xml_thumb
+    video.GetEditLink   = get_xml_edit_link
+    'video.GetLinks     = function():return m.xml.GetNamedElements("link"):end function
+    'video.GetURL       = video_get_url
     return video
 End Function
 
@@ -555,23 +555,24 @@ Function GetVideoMetaData(videos As Object)
     metadata=[]
         
     for each video in videos
-        meta=CreateObject("roAssociativeArray")
-        meta.ContentType="movie"
+        meta = CreateObject("roAssociativeArray")
+        meta.ContentType = "movie"
         
-        meta.ID=video.GetID()
-        meta.Author=video.GetAuthor()
-        meta.Title=video.GetTitle()
-        meta.Actors=meta.Author
-        meta.Description=video.GetDesc()
-        meta.Categories=video.GetCategory()
-        meta.StarRating=video.GetRating()
-        meta.ShortDescriptionLine1=meta.Title
-        meta.SDPosterUrl=video.GetThumb()
-        meta.HDPosterUrl=video.GetThumb()
-        meta.Length = video.GetLength()
-        meta.xml=video.xml
-        meta.UserID=video.GetUserID()
-        meta.EditLink=video.GetEditLink(video.xml)
+        meta.ID                     = video.GetID()
+        meta.Author                 = video.GetAuthor()
+        meta.Title                  = video.GetTitle()
+        meta.Actors                 = meta.Author
+        meta.Description            = video.GetDesc()
+        meta.Categories             = video.GetCategory()
+        meta.StarRating             = video.GetRating()
+        meta.ShortDescriptionLine1  = meta.Title
+        meta.ShortDescriptionLine2  = get_length_as_human_readable(video.GetLength())
+        meta.SDPosterUrl            = video.GetThumb()
+        meta.HDPosterUrl            = video.GetThumb()
+        meta.Length                 = video.GetLength()
+        meta.xml                    = video.xml
+        meta.UserID                 = video.GetUserID()
+        meta.EditLink               = video.GetEditLink(video.xml)
 
         meta.StreamFormat="mp4"
         meta.Streams=[]
@@ -592,12 +593,42 @@ Function get_desc() As Dynamic
     end if
 End Function
 
-REM  Returns the length of the video from the yt:duration element:
-REM <yt:duration seconds=val>
+'*******************************************
+'  Returns the length of the video from the yt:duration element:
+'  <yt:duration seconds=val>
+'*******************************************
 Function get_length() As Dynamic
     durations = m.xml.GetNamedElements("media:group")[0].GetNamedElements("yt:duration")
     if durations.Count() > 0 then
         return durations.GetAttributes()["seconds"]
+    end if
+End Function
+
+'*******************************************
+'  Returns the length of the video in a human-friendly format
+'  i.e. 3700 seconds becomes: 1h 1m
+'  TODO: use utility functions in generalUtils
+'*******************************************
+Function get_length_as_human_readable(length As Dynamic) As String
+    if type(length) = "roString" then
+        len% = length.toint()
+    else if type(length) = "roInteger" then
+        len% = length
+    else
+        return "Unknown"
+    end if
+
+    if ( len% > 0 ) then 
+        hours%   = FIX(len% / 3600)
+        len% = len% - (hours% * 3600)
+        minutes% = FIX(len% / 60)
+        seconds% = len% MOD 60
+        if ( hours% > 0 ) then
+            return Stri(hours%) + "h" + Stri(minutes%) + "m"
+        else
+            return Stri(minutes%) + "m" + Stri(seconds%) + "s"
+        end if
+        
     end if
 End Function
 
@@ -714,6 +745,22 @@ Sub youtube_display_video_springboard(video As Object, breadcrumb As String, vid
                 else if msg.GetIndex() = 6 then
                     m.RemoveFavorite(video, buttons)
                 endif
+            else if msg.isRemoteKeyPressed() then
+                if msg.GetIndex() = 4 then  ' left
+                    idx = idx - 1
+                    if ( idx < 0 ) then
+                        ' Last video is the 'Next' video link
+                        idx = videos.Count() - 2
+                    end if 
+                    screen.SetContent( videos[ idx ] )
+                else if msg.GetIndex() = 5 then ' right
+                    idx = idx + 1
+                    if ( idx = videos.Count() - 1 ) then
+                        ' Last video is the 'Next' video link
+                        idx = 0
+                    end if 
+                    screen.SetContent( videos[ idx ] )
+                end if
             else
                 'print "Unknown event: "; msg.GetType(); " msg: "; msg.GetMessage()
             endif
