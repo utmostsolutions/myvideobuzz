@@ -13,16 +13,17 @@ End Sub
 
 Sub ShowHomeScreen()
     ' Pop up start of UI for some instant feedback while we load the icon data
-    screen=uitkPreShowPosterMenu()
+    ytusername = RegRead("YTUSERNAME1", invalid)
+    screen=uitkPreShowPosterMenu("flat-category", ytusername)
     if screen=invalid then
         'print "unexpected error in uitkPreShowPosterMenu"
         return
-    end if    
-    
+    end if
+
     Init()
 '    oa = Oauth()
     youtube = LoadYouTube()
-    
+
   '  if doRegistration() <> 0 then
    '     reason = "unknown"
     '    if not oa.linked() then reason = "unlinked"
@@ -31,13 +32,12 @@ Sub ShowHomeScreen()
       '  sleep(25)
        ' return
     'end if
-    
+
     menudata=[]
 
     menudata.Push({ShortDescriptionLine1:"Settings", OnClick:"BrowseSettings", ShortDescriptionLine2:"Edit channel settings", HDPosterUrl:"pkg:/images/Settings.jpg", SDPosterUrl:"pkg:/images/Settings.jpg"})
     menudata.Push({ShortDescriptionLine1:"Search", OnClick:"SearchYoutube", ShortDescriptionLine2:"Search YouTube for videos",  HDPosterUrl:"pkg:/images/Search.jpg", SDPosterUrl:"pkg:/images/Search.jpg"})
 
-    ytusername = RegRead("YTUSERNAME1", invalid)
     if (ytusername<>invalid) and (isnonemptystr(ytusername)) then
         menudata.Push({ShortDescriptionLine1:"What to Watch", FeedURL:"users/" + ytusername + "/newsubscriptionvideos?v=2&max-results=50", Category:"false", ShortDescriptionLine2:"What's new to watch", HDPosterUrl:"pkg:/images/whattowatch.jpg", SDPosterUrl:"pkg:/images/whattowatch.jpg"})
         menudata.Push({ShortDescriptionLine1:"My Playlists", FeedURL:"users/" + ytusername + "/playlists?v=2&max-results=50", Category:"true", ShortDescriptionLine2:"Browse your Playlists", HDPosterUrl:"pkg:/images/YourPlaylists.jpg", SDPosterUrl:"pkg:/images/YourPlaylists.jpg"})
@@ -52,26 +52,26 @@ Sub ShowHomeScreen()
     menudata.Push({ShortDescriptionLine1:"Top Favorites", FeedURL:"pkg:/xml/topfav.xml", Category:"true",  ShortDescriptionLine2:"Top Favorites videos", HDPosterUrl:"pkg:/images/TopFavorites.jpg", SDPosterUrl:"pkg:/images/TopFavorites.jpg"})
     menudata.Push({ShortDescriptionLine1:"Most Responded", FeedURL:"pkg:/xml/mostresponded.xml", Category:"true",  ShortDescriptionLine2:"Most Responded videos", HDPosterUrl:"pkg:/images/MostResponded.jpg", SDPosterUrl:"pkg:/images/MostResponded.jpg"})
 
-    onselect = [1, menudata, m.youtube, 
+    onselect = [1, menudata, m.youtube,
         function(menu, youtube, set_idx)
-            'PrintAny(0, "menu:", menu) 
-            if menu[set_idx]["FeedURL"]<>invalid then 
+            'PrintAny(0, "menu:", menu)
+            if menu[set_idx]["FeedURL"]<>invalid then
                 feedurl = menu[set_idx]["FeedURL"]
                 youtube.FetchVideoList(feedurl,menu[set_idx]["ShortDescriptionLine1"], invalid, strtobool(menu[set_idx]["Category"]))
-            else if menu[set_idx]["OnClick"]<>invalid then 
+            else if menu[set_idx]["OnClick"]<>invalid then
                 onclickevent = menu[set_idx]["OnClick"]
                 youtube[onclickevent]()
             end if
         end function]
 
     uitkDoPosterMenu(menudata, screen, onselect)
-    
+
     sleep(25)
 End Sub
 
 '*************************************************************
 '** Set the configurable theme attributes for the application
-'** 
+'**
 '** Configure the custom overhang and Logo attributes
 '*************************************************************
 

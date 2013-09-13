@@ -3,14 +3,15 @@
 '
 '    Display "menu" items in a Poster Screen.   
 '
-Function uitkPreShowPosterMenu(ListStyle="flat-category" as String, breadA=invalid, breadB=invalid) As Object
+Function uitkPreShowPosterMenu(ListStyle="flat-category" as String, breadA = "Home", breadB = invalid) As Object
     port=CreateObject("roMessagePort")
     screen = CreateObject("roPosterScreen")
     screen.SetMessagePort(port)
 
-    if breadA<>invalid and breadB<>invalid then
+    if breadA <> invalid and breadB<>invalid then
         screen.SetBreadcrumbText(breadA, breadB)
-    elseif breadA<>invalid and breadB = invalid then
+    elseif breadA <> invalid and breadB = invalid then
+        screen.SetBreadcrumbText(breadA, "")
         screen.SetTitle(breadA)
     end if
 
