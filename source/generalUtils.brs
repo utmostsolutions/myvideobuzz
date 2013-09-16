@@ -72,7 +72,7 @@ Function internalQSort(A as Object, left as integer, right as integer) as void
     endif
     if (i < right)
         internalQSort(A, i, right)
-    end if        
+    end if
 End Function
 
 ' quicksort an array using a function to extract the compare value
@@ -100,7 +100,7 @@ Function internalKeyQSort(A as Object, key as object, left as integer, right as 
     endif
     if (i < right)
         internalKeyQSort(A, key, i, right)
-    end if        
+    end if
 End Function
 
 ' quicksort an array using an indentically sized array that holds the comparison values
@@ -128,7 +128,7 @@ Function internalKeyArrayQSort(A as Object, keys as object, left as integer, rig
     endif
     if (i < right)
         internalKeyArrayQSort(A, keys, i, right)
-    end if        
+    end if
 End function
 
 '******************************************************

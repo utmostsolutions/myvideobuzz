@@ -14,14 +14,14 @@ Function InitYouTube() As Object
     this.scope = this.protocol + "://gdata.youtube.com"
     this.prefix = this.scope + "/feeds/api"
     'this.FieldsToInclude = "&fields=entry(title,author,link,gd:rating,media:group(media:category,media:description,media:thumbnail,yt:videoid))"
-    
+
     this.CurrentPageTitle = ""
     this.screen=invalid
     this.video=invalid
 
     'API Calls
     this.ExecServerAPI = youtube_exec_api
-    
+
     'Search
     this.SearchYouTube = youtube_search
 
@@ -62,9 +62,9 @@ Function InitYouTube() As Object
     'Settings
     this.BrowseSettings = youtube_browse_settings
     this.DelinkPlayer = youtube_delink
-    this.About = youtube_about 
+    this.About = youtube_about
     this.AddAccount = youtube_add_account
-    
+
     'print "YouTube: init complete"
     return this
 End Function
@@ -72,7 +72,7 @@ End Function
 
 Function youtube_exec_api(request As Dynamic, username="default" As Dynamic) As Object
     'oa = Oauth()
-    
+
     if username=invalid then
         username=""
     else
@@ -90,7 +90,7 @@ Function youtube_exec_api(request As Dynamic, username="default" As Dynamic) As 
         if request.headers<>invalid then headers = request.headers
         if request.method<>invalid then method = request.method
     end if
-        
+
     if Instr(0, url_stub, "http://") OR Instr(0, url_stub, "https://") then
         http = NewHttp(url_stub)
     else
@@ -98,14 +98,14 @@ Function youtube_exec_api(request As Dynamic, username="default" As Dynamic) As 
     end if
 
     'if not headers.DoesExist("X-GData-Key") then headers.AddReplace("X-GData-Key", "key="+m.devKey)
-    'if not headers.DoesExist("GData-Version") then headers.AddReplace("GData-Version", "2") 
+    'if not headers.DoesExist("GData-Version") then headers.AddReplace("GData-Version", "2")
 
     http.method = method
     http.AddParam("v","2","urlParams")
     'oa.sign(http,true)
 
     'print "----------------------------------"
-    if Instr(1, request, "pkg:/") > 0 then 
+    if Instr(1, request, "pkg:/") > 0 then
         rsp = ReadAsciiFile(request)
     else if postdata<>invalid then
         rsp=http.PostFromStringWithTimeout(postdata, 10, headers)
@@ -124,7 +124,7 @@ Function youtube_exec_api(request As Dynamic, username="default" As Dynamic) As 
     returnObj = CreateObject("roAssociativeArray")
     returnObj.xml = xml
     returnObj.status = http.status
-    if Instr(1, request, "pkg:/") < 0 then 
+    if Instr(1, request, "pkg:/") < 0 then
         returnObj.error = handleYoutubeError(returnObj)
     end if
 
@@ -167,18 +167,18 @@ End Function
 '********************************************************************
 '********************************************************************
 Sub youtube_search()
-    port=CreateObject("roMessagePort") 
+    port=CreateObject("roMessagePort")
     screen=CreateObject("roSearchScreen")
     screen.SetMessagePort(port)
-    
+
     history=CreateObject("roSearchHistory")
     screen.SetSearchTerms(history.GetAsArray())
-    
+
     screen.Show()
-    
+
     while true
         msg = wait(0, port)
-        
+
         if type(msg) = "roSearchScreenEvent" then
             'print "Event: "; msg.GetType(); " msg: "; msg.GetMessage()
             if msg.isScreenClosed() then
@@ -210,15 +210,15 @@ End Sub
 
 
 Function GenerateSearchSuggestions(partSearchText As String) As Object
-    suggestions = CreateObject("roArray", 1, true) 
+    suggestions = CreateObject("roArray", 1, true)
     length = len(partSearchText)
     if length > 0 then
         searchRequest = CreateObject("roUrlTransfer")
         searchRequest.SetURL("http://suggestqueries.google.com/complete/search?hl=en&client=youtube&hjson=t&ds=yt&jsonp=window.yt.www.suggest.handleResponse&q=" + URLEncode(partSearchText))
-        jsonAsString = searchRequest.GetToString() 
+        jsonAsString = searchRequest.GetToString()
         jsonAsString = strReplace(jsonAsString,"window.yt.www.suggest.handleResponse(","")
         jsonAsString = Left(jsonAsString, Len(jsonAsString) -1)
-        response = simpleJSONParser(jsonAsString) 
+        response = simpleJSONParser(jsonAsString)
 
         if islist(response) = true
             if response.Count() > 1
@@ -231,7 +231,7 @@ Function GenerateSearchSuggestions(partSearchText As String) As Object
     else
         history=CreateObject("roSearchHistory")
         suggestions = history.GetAsArray()
-    end if 
+    end if
     return suggestions
 End Function
 
@@ -263,7 +263,7 @@ Sub youtube_add_favorite(video As Object, buttons={} As Object)
     request.headers = headers
 
     response=m.ExecServerAPI(request, "default")
-    
+
     dialog.Close()
 
     if tostr(response.error) = "" and int(response.status) = 201 then
@@ -271,10 +271,10 @@ Sub youtube_add_favorite(video As Object, buttons={} As Object)
         m.video.EditLink=get_xml_edit_link(response.xml)
         m.UpdateButtons(buttons)
         m.screen.AddButton(3, "Remove from Favorites")
-    else 
-        ' this is a really awful way to handle 
+    else
+        ' this is a really awful way to handle
         ' checking favorites and i should be ashamed
-        if tostr(response.error) = "Video already in favorite list." then 
+        if tostr(response.error) = "Video already in favorite list." then
             do = ShowDialog2Buttons("Notice", "This video is already in your favorites. If you would like to remove it, visit the Favorites section from the main menu.", "OK", "Go To Favorites")
             if do = 1 then m.BrowseFavorites()
         end if
@@ -291,7 +291,7 @@ Sub youtube_remove_favorite(video As Object, buttons={} As Object)
     request.method = "DELETE"
 
     response=m.ExecServerAPI(request, "default")
-    
+
     dialog.Close()
 
     if tostr(response.error) = "" and int(response.status) = 200 then
@@ -311,7 +311,7 @@ End Sub
 '********************************************************************
 '********************************************************************
 Sub youtube_history()
-    
+
 End Sub
 
 
@@ -368,7 +368,7 @@ End Sub
 '********************************************************************
 '********************************************************************
 Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As Dynamic,categories=false)
-    
+
     'fields = m.FieldsToInclude
     'if Instr(0, APIRequest, "?") = 0 then
     '    fields = "?"+Mid(fields, 2)
@@ -383,12 +383,12 @@ Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As
         return
     end if
     if not isxmlelement(response.xml) then ShowConnectionFailed():return
-    
+
     ' Everything is OK, display the list
     xml = response.xml
     if categories = true then
         categories = m.CategoriesListFromXML(xml.entry)
-        'PrintAny(0, "categoryList:", categories) 
+        'PrintAny(0, "categoryList:", categories)
         m.DisplayVideoList([], title, xml.link, screen, categories)
     else
         videos = m.newVideoListFromXML(xml.entry)
@@ -399,8 +399,8 @@ End Sub
 
 Function youtube_return_video(APIRequest As Dynamic, title As String, username As Dynamic)
     xml=m.ExecServerAPI(APIRequest, username)["xml"]
-    if not isxmlelement(xml) then 
-        ShowConnectionFailed() 
+    if not isxmlelement(xml) then
+        ShowConnectionFailed()
         return []
     end if
 
@@ -409,9 +409,9 @@ Function youtube_return_video(APIRequest As Dynamic, title As String, username A
 
     if xml.link<>invalid then
         for each link in xml.link
-            if link@rel = "next" then 
+            if link@rel = "next" then
                 metadata.Push({shortDescriptionLine1: "More Results", action: "next", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_next_episode.jpg", SDPosterUrl:"pkg:/images/icon_next_episode.jpg"})
-            else if link@rel = "previous" then 
+            else if link@rel = "previous" then
                 metadata.Unshift({shortDescriptionLine1: "Back", action: "prev", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_prev_episode.jpg", SDPosterUrl:"pkg:/images/icon_prev_episode.jpg"})
             end if
         end for
@@ -429,17 +429,17 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
 
     'content_callback=[ff_data, m, function(ff_data, smugmug, cat_idx):return smugmug.getFFMetaData(ff_data[cat_idx]):end function]
     'onclick_callback=[ff_data, m, function(ff_data, smugmug, cat_idx, set_idx):smugmug.DisplayFriendsFamily(ff_data[cat_idx][set_idx]):end function]
-    
+
     if categories <> invalid then
         categoryList = CreateObject("roArray", 100, true)
         for each category in categories
             categoryList.Push(category.title)
         next
 
-        oncontent_callback = [categories, m, 
+        oncontent_callback = [categories, m,
             function(categories, youtube, set_idx)
-                'PrintAny(0, "category:", categories[set_idx]) 
-                if youtube <> invalid AND categories.Count() > 0 then 
+                'PrintAny(0, "category:", categories[set_idx])
+                if youtube <> invalid AND categories.Count() > 0 then
                     return youtube.ReturnVideoList(categories[set_idx].link, youtube.CurrentPageTitle, invalid)
                 else
                     return []
@@ -447,9 +447,9 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
             end function]
 
 
-        onclick_callback = [categories, m, 
+        onclick_callback = [categories, m,
             function(categories, youtube, video, category_idx, set_idx)
-                if video[set_idx]["action"]<>invalid then 
+                if video[set_idx]["action"]<>invalid then
                     return youtube.ReturnVideoList(video[set_idx]["pageURL"], youtube.CurrentPageTitle, invalid)
                 else
                     youtube.VideoDetails(video[set_idx], youtube.CurrentPageTitle, video, set_idx)
@@ -462,16 +462,16 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
         metadata = GetVideoMetaData(videos)
 
         for each link in links
-            if link@rel = "next" then 
+            if link@rel = "next" then
                 metadata.Push({shortDescriptionLine1: "More Results", action: "next", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_next_episode.jpg", SDPosterUrl:"pkg:/images/icon_next_episode.jpg"})
-            else if link@rel = "previous" then 
+            else if link@rel = "previous" then
                 metadata.Unshift({shortDescriptionLine1: "Back", action: "prev", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_prev_episode.jpg", SDPosterUrl:"pkg:/images/icon_prev_episode.jpg"})
             end if
         end for
-        
-        onselect = [1, metadata, m, 
+
+        onselect = [1, metadata, m,
             function(video, youtube, set_idx)
-                if video[set_idx]["action"] <> invalid then 
+                if video[set_idx]["action"] <> invalid then
                     youtube.FetchVideoList(video[set_idx]["pageURL"], youtube.CurrentPageTitle, invalid)
                 else
                     youtube.VideoDetails(video[set_idx], youtube.CurrentPageTitle, video, set_idx)
@@ -494,7 +494,7 @@ Function youtube_new_video_cat_list(xmllist As Object) As Object
     'print "youtube_new_video_cat_list init"
     categoryList  = CreateObject("roList")
     for each record in xmllist
-        ''printAny(0, "xmllist:", record) 
+        ''printAny(0, "xmllist:", record)
         category  = CreateObject("roAssociativeArray")
         category.title = record.GetNamedElements("title")[0].GetText()
         category.link= validstr(record.content@src)
@@ -502,7 +502,7 @@ Function youtube_new_video_cat_list(xmllist As Object) As Object
         if isnullorempty(category.link) then
             links = record.link
             for each link in links
-                if Instr(1, link@rel, "user.uploads") > 0 then 
+                if Instr(1, link@rel, "user.uploads") > 0 then
                     category.link = validstr(link@href) + "&max-results=50"
                 end if
             next
@@ -554,11 +554,11 @@ End Function
 
 Function GetVideoMetaData(videos As Object)
     metadata=[]
-        
+
     for each video in videos
         meta = CreateObject("roAssociativeArray")
         meta.ContentType = "movie"
-        
+
         meta.ID                     = video.GetID()
         meta.Author                 = video.GetAuthor()
         meta.Title                  = video.GetTitle()
@@ -580,10 +580,10 @@ Function GetVideoMetaData(videos As Object)
         'meta.StreamBitrates=[]
         'meta.StreamQualities=[]
         'meta.StreamUrls=[]
-        
+
         metadata.Push(meta)
     end for
-    
+
     return metadata
 End Function
 
@@ -619,7 +619,7 @@ Function get_length_as_human_readable(length As Dynamic) As String
         return "Unknown"
     end if
 
-    if ( len% > 0 ) then 
+    if ( len% > 0 ) then
         hours%   = FIX(len% / 3600)
         len% = len% - (hours% * 3600)
         minutes% = FIX(len% / 60)
@@ -629,7 +629,7 @@ Function get_length_as_human_readable(length As Dynamic) As String
         else
             return Stri(minutes%) + "m" + Stri(seconds%) + "s"
         end if
-        
+
     end if
 End Function
 
@@ -638,7 +638,7 @@ Function get_xml_author() As Dynamic
     if credits.Count()>0 then
         for each author in credits
             if author.GetAttributes()["role"] = "uploader" then return author.GetAttributes()["yt:display"]
-        end for 
+        end for
     end if
 End Function
 
@@ -777,7 +777,7 @@ Function build_buttons() as Object
     buttons["show_related"] = m.screen.AddButton(2, "Show Related Videos")
     buttons["more"]         = m.screen.AddButton(3, "More Videos By " + m.video.Author)
 
-    'if m.video.EditLink<>invalid then 
+    'if m.video.EditLink<>invalid then
         'buttons["fav_rem"] = screen.AddButton(3, "Remove from Favorites")
     'else
         'buttons["fav_add"] = screen.AddButton(2, "Add to Favorites")
@@ -796,7 +796,7 @@ Function DisplayVideo(content As Object)
 
     mp4VideoList = getVideoUrl(content.id, 0, "")
     ''printAA(mp4VideoList)
-    'printAny(0, "content:", content) 
+    'printAny(0, "content:", content)
     if mp4VideoList <> Invalid
         if not(isnullorempty(mp4VideoList.hdUrl))
             content.HDBranded = true
@@ -828,7 +828,7 @@ Function DisplayVideo(content As Object)
     while true
         msg = wait(0, video.GetMessagePort())
         if type(msg) = "roVideoScreenEvent"
-            if Instr(1, msg.getMessage(), "interrupted") > 0 then 
+            if Instr(1, msg.getMessage(), "interrupted") > 0 then
                 ret = 1
             end if
             if msg.isScreenClosed() then 'ScreenClosed event
@@ -853,7 +853,7 @@ End Function
 '********************************************************************
 '********************************************************************
 Function parseVideoFormatsMap(videoInfo As String) As Object
-    
+
     'print "-----------------------------------------------"
     'print videoInfo
     'print "-----------------------------------------------"
@@ -888,7 +888,7 @@ Function parseVideoFormatsMap(videoInfo As String) As Object
             end if
         end for
 
-        if videoFormatsPair["url"]<>invalid then 
+        if videoFormatsPair["url"]<>invalid then
             r1=CreateObject("roRegex", "\\\/", ""):r2=CreateObject("roRegex", "\\u0026", "")
             url=URLDecode(URLDecode(videoFormatsPair["url"]))
             r1.ReplaceAll(url, "/"):r2.ReplaceAll(url, "&")
@@ -896,12 +896,12 @@ Function parseVideoFormatsMap(videoInfo As String) As Object
         if videoFormatsPair["itag"]<>invalid then
             itag = videoFormatsPair["itag"]
         end if
-        if videoFormatsPair["sig"]<>invalid then 
+        if videoFormatsPair["sig"]<>invalid then
             sig = videoFormatsPair["sig"]
             url = url + "&signature=" + sig
         end if
 
-        if Instr(0, LCase(url), "http") = 1 then 
+        if Instr(0, LCase(url), "http") = 1 then
             videoURL[itag] = url
         end if
     end for
@@ -987,7 +987,7 @@ function getVideoUrl (videoIdOrUrl as string, timeout = 0 as integer, loginCooki
         mp4VideoList.sdUrl = mp4VideoList.fallback2
      else
         mp4VideoList = Invalid
-      end if 
+      end if
    end if
    return mp4VideoList
 end function
@@ -1110,6 +1110,6 @@ Function video_get_qualities(videoID as String) As Object
     else
         ShowErrorDialog("HTTP Request for get_video_info failed!")
     end if
-    
+
     return invalid
 End Function

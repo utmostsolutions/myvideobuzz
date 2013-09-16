@@ -5,10 +5,10 @@ Function doRegistration() As Integer
     screenFacade.show()
 
     oa = Oauth()
-    
+
     if oa.linked()
         token_status = checkOauthToken()
-        if token_status=1 then 
+        if token_status=1 then
             oa.erase()
         else if token_status=2
             return token_status
@@ -21,13 +21,13 @@ Function doRegistration() As Integer
         showCongratulationsScreen()
     end if
 
-    return 0   
+    return 0
 
 End Function
 
 Function checkOauthToken() As Integer
     print "RegScreen: checkOauthToken"
-    
+
     youtube = LoadYouTube()
     oa = Oauth()
 
@@ -36,14 +36,14 @@ Function checkOauthToken() As Integer
     http.getToStringWithTimeout(10)
     if http.status=200 then
         return 0
-    else 
+    else
         ans=ShowDialog2Buttons("Token invalid", "Unable to authenticate.  This could be a temporary issue or due to revoked access by the user.", "Link Again", "Exit")
-        if ans=0 then 
+        if ans=0 then
             return 1
         else
             return 2
         end if
-    end if    
+    end if
 End Function
 
 Function doOauthLink() As Integer
@@ -77,7 +77,7 @@ Function doTempLink() As Integer
     oa.authtoken = params.get("oauth_token")
     oa.authsecret = params.get("oauth_token_secret")
 
-    if isnonemptystr(oa.authtoken) AND isnonemptystr(oa.authsecret) 
+    if isnonemptystr(oa.authtoken) AND isnonemptystr(oa.authsecret)
         print "temp oauth: "; oa.dump()
         status = 0
     else
@@ -95,32 +95,32 @@ Function doYouTubeEnroll() As Integer
 
     youtube = LoadYouTube()
     oa = Oauth()
-    
+
     regscreen = displayRegistrationScreen()
-    
+
     while true
-        sn = CreateObject("roDeviceInfo").GetDeviceUniqueId() 
+        sn = CreateObject("roDeviceInfo").GetDeviceUniqueId()
         regCode = getRegistrationCode(sn)
-        
+
         'if we've failed to get the registration code, bail out, otherwise we'll
-        'get rid of the retreiving... text and replace it with the real code       
+        'get rid of the retreiving... text and replace it with the real code
         if regCode = "" then return 2
         regscreen.SetRegistrationCode(regCode)
         print "Enter registration code " + regCode + " at " + youtube.link_prefix + " for " + sn
-        
+
         duration = 0
         'make an http request to see if the device has been registered on the backend
         while true
             status = checkRegistrationStatus(sn, regCode)
             print itostr(status)
             if status < 3 return status
-            
+
             getNewCode = false
             retryInterval=m.retryInterval
             retryDuration=m.retryDuration
             print "retry duration "; itostr(duration); " at ";  itostr(retryInterval);
             print " sec intervals for "; itostr(retryDuration); " secs max"
-          
+
             'wait for the retry interval to expire or the user to press a button
             'indicating they either want to quit or fetch a new registration code
             while true
@@ -128,7 +128,7 @@ Function doYouTubeEnroll() As Integer
                 msg = wait(retryInterval * 1000, regscreen.GetMessagePort())
                 duration = duration + retryInterval
                 if msg = invalid exit while
-                
+
                 if type(msg) = "roCodeRegistrationScreenEvent"
                     if msg.isScreenClosed()
                         print "Screen closed"
@@ -144,19 +144,19 @@ Function doYouTubeEnroll() As Integer
                     endif
                 endif
             end while
-            
+
             if duration >= retryDuration then
                 ans=ShowDialog2Buttons("Request timed out", "Unable to link to YouTube within time limit.", "Try Again", "Back")
-                if ans=0 then 
+                if ans=0 then
                     regscreen.SetRegistrationCode("retrieving code...")
                     getNewCode = true
                 else
                     return 1
                 end if
             end if
-            
+
             if getNewCode exit while
-            
+
             print "poll prelink again..."
         end while
     end while
@@ -171,7 +171,7 @@ Function doLink() As Integer
 
     youtube = LoadYouTube()
     oa = Oauth()
-    
+
     http = NewHttp(youtube.oauth_prefix+"/OAuthGetAccessToken")
     'oa.verifier = pinCode
     oa.sign(http,true,true)
@@ -246,31 +246,31 @@ End Function
 '********************************************************************
 Function getRegistrationCode(sn As String) As String
     if sn = "" then return ""
-    
+
     oa = Oauth()
     youtube = LoadYouTube()
-    
+
     http = NewHttp(youtube.link_prefix+"/getRegCode?partner=roku&service=youtube&deviceTypeName=roku&deviceID="+sn+"&oauth_token="+oa.authtoken)
     print "RegScreen: access_token URL: "; http.GetUrl()
 
     rsp = http.getToStringWithTimeout(10)
-    
+
     xml=ParseXML(rsp)
     print "GOT: " + rsp
     print "Reason: " + http.Http.GetFailureReason()
-    
+
     if xml=invalid then
         print "Can't parse getRegistrationCode response"
         ShowConnectionFailed()
         return ""
     endif
-    
+
     if xml.GetName() <> "result"
         Dbg("Bad register response: ",  xml.GetName())
         ShowConnectionFailed()
         return ""
     endif
-    
+
     if islist(xml.GetBody()) = false then
         Dbg("No registration information available")
         ShowConnectionFailed()
@@ -282,7 +282,7 @@ Function getRegistrationCode(sn As String) As String
     retryDuration = 900 'seconds (aka 15 minutes)
     regCode = ""
 
-    'handle validation of response fields 
+    'handle validation of response fields
     for each e in xml.GetBody()
         if e.GetName() = "regCode" then
             regCode = e.GetBody()  'enter this code at website
@@ -292,26 +292,26 @@ Function getRegistrationCode(sn As String) As String
             retryDuration = strtoi(e.GetBody())
         endif
     next
-    
+
     if regCode = "" then
         Dbg("Parse yields empty registration code")
         ShowConnectionFailed()
     endif
-    
+
     m.retryDuration = retryDuration
     m.retryInterval = retryInterval
     m.regCode = regCode
-    
+
     return regCode
 End Function
 
 Function displayRegistrationScreen() As Object
     youtube = LoadYouTube()
-    
+
     regsite   = youtube.link_prefix
     regscreen = CreateObject("roCodeRegistrationScreen")
     regscreen.SetMessagePort(CreateObject("roMessagePort"))
-    
+
     regscreen.SetTitle("")
     regscreen.AddParagraph("Please link your Roku player to your YouTube account")
     regscreen.AddFocalText(" ", "spacing-dense")
@@ -323,7 +323,7 @@ Function displayRegistrationScreen() As Object
     regscreen.AddButton(0, "Get a new code")
     regscreen.AddButton(1, "Back")
     regscreen.Show()
-    
+
     return regscreen
 End Function
 
@@ -338,10 +338,10 @@ End Function
 Function checkRegistrationStatus(sn As String, regCode As String) As Integer
     oa = Oauth()
     youtube = LoadYouTube()
-    
+
     print "checking registration status"
     http = NewHttp(youtube.link_prefix+"/getRegResult?service=youtube&partner=roku&deviceID="+sn+"&regCode="+regCode)
-    
+
     while true
         rsp = http.getToStringWithTimeout(10)
         print rsp
@@ -351,18 +351,18 @@ Function checkRegistrationStatus(sn As String, regCode As String) As Integer
             ShowConnectionFailed()
             return 2
         endif
-        
+
         if xml.GetName() <> "result" then
             print "unexpected check registration status response: ", xml.GetName()
             ShowConnectionFailed()
             return 2
         endif
-        
+
         if islist(xml.GetBody()) = true then
             for each e in xml.GetBody()
                 if e.GetName() = "status" then
                     status = e.GetBody()
-                    
+
                     if status="failure" then
                         ShowConnectionFailed()
                         return 2
@@ -386,20 +386,20 @@ Sub showCongratulationsScreen()
     port = CreateObject("roMessagePort")
     screen = CreateObject("roParagraphScreen")
     screen.SetMessagePort(port)
-    
+
     screen.AddHeaderText("Congratulations!")
     screen.AddParagraph("You have successfully linked your Roku player to your YouTube account.")
     screen.AddParagraph("Select 'start' to begin.")
     screen.AddButton(1, "start")
     screen.Show()
-    
+
     while true
         msg = wait(0, screen.GetMessagePort())
-        
+
         if type(msg) = "roParagraphScreenEvent"
             if msg.isScreenClosed()
                 print "Screen closed"
-                exit while                
+                exit while
             else if msg.isButtonPressed()
                 print "Button pressed: "; msg.GetIndex(); " " msg.GetData()
                 exit while

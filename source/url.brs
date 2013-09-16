@@ -22,7 +22,7 @@ REM ******************************************************
 
 Function NewHttp(url As String, port=invalid As Dynamic, method="GET" As String) as Object
     this                           = CreateObject("roAssociativeArray")
-    this.port                      = port 
+    this.port                      = port
     this.method                    = method
     this.anchor                    = ""
     this.label                     = "init"
@@ -81,10 +81,10 @@ Function http_prep(method="" As String)
     urlobj.SetCertificatesFile("common:/certs/ca-bundle.crt")
     urlobj.EnableEncodings(true)
     urlobj.AddHeader("Expect","")
-    'urlobj.RetainBodyOnError(true) 
+    'urlobj.RetainBodyOnError(true)
     url = m.GetUrl()
     urlobj.SetUrl(url)
-    if m.method<>"" and m.method<>method then m.method=method 
+    if m.method<>"" and m.method<>method then m.method=method
     urlobj.SetRequest(m.method)
     HttpActive().replace(m,urlobj)
     m.timer.mark()
@@ -503,7 +503,7 @@ Function HttpActive() As Object
         ha.total    = strtoi(validstr(RegRead("Http.total","Debug")))
         m.HttpActive = ha
     end if
-    return ha    
+    return ha
 End Function
 
 Function http_active_count() As Dynamic

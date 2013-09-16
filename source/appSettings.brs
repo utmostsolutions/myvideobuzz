@@ -6,13 +6,13 @@ Sub youtube_browse_settings()
         {ShortDescriptionLine1:"About",       ShortDescriptionLine2:"About the channel",           HDPosterUrl:"pkg:/images/icon_barcode.jpg", SDPosterUrl:"pkg:/images/icon_barcode.jpg"},
     ]
     onselect = [0, m, "AddAccount","About"]
-    
+
     uitkDoPosterMenu(settingmenu, screen, onselect)
 End Sub
 
 Sub youtube_delink()
     ans=ShowDialog2Buttons("Deactivate","Remove link to your YouTube account?","Confirm","Cancel")
-    if ans=0 then 
+    if ans=0 then
         oa = Oauth()
         oa.erase()
     end if
@@ -20,23 +20,23 @@ End Sub
 
 Sub youtube_add_account()
      screen = CreateObject("roKeyboardScreen")
-     port = CreateObject("roMessagePort") 
+     port = CreateObject("roMessagePort")
      screen.SetMessagePort(port)
      screen.SetTitle("Youtube User Settings")
-     
+
     ytusername = RegRead("YTUSERNAME1")
     if ytusername<>invalid then
     screen.SetText(ytusername)
     end if
- 
+
      screen.SetDisplayText("Enter your Youtube User name (not email address)")
      screen.SetMaxLength(35)
      screen.AddButton(1, "finished")
      screen.AddButton(2, "help")
-     screen.Show() 
+     screen.Show()
 
      while true
-         msg = wait(0, screen.GetMessagePort()) 
+         msg = wait(0, screen.GetMessagePort())
          if type(msg) = "roKeyboardScreenEvent"
              if msg.isScreenClosed()
                  return
@@ -67,20 +67,20 @@ Sub youtube_about()
     port = CreateObject("roMessagePort")
     screen = CreateObject("roParagraphScreen")
     screen.SetMessagePort(port)
-    
+
     screen.AddHeaderText("About the channel")
     screen.AddParagraph("The channel is an open source channel developed by Utmost Solutions, based on the Roku Youtube Channel by Jeston Tigchon. Source code of the channel can be found at http://utmostsolutions.github.io/myvideobuzz/.  This channel is not affiliated with Google or YouTube.")
     screen.AddParagraph("Version 5.0")
     screen.AddButton(1, "Back")
     screen.Show()
-    
+
     while true
         msg = wait(0, screen.GetMessagePort())
-        
+
         if type(msg) = "roParagraphScreenEvent"
             if msg.isScreenClosed()
                 'print "Screen closed"
-                exit while                
+                exit while
             else if msg.isButtonPressed()
                 'print "Button pressed: "; msg.GetIndex(); " " msg.GetData()
                 exit while

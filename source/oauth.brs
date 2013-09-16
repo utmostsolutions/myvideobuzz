@@ -38,10 +38,10 @@ Function InitOauth(appname As String, consumerkey As String, sharedsecret As Str
 
     this.items.push("authtoken")
     this.items.push("authsecret")
-    
+
     this.timestamp = createobject("rotimespan")
     this.datetime  = createobject("rodatetime")
-    
+
     this.unprotectedkeys = ["oauth_consumer_key", "oauth_nonce", "oauth_signature_method", "oauth_timestamp", "oauth_version" ]
     this.protectedkeys   = ["oauth_consumer_key", "oauth_nonce", "oauth_signature_method", "oauth_timestamp", "oauth_version", "oauth_token"]
     this.verifierkeys    = ["oauth_consumer_key", "oauth_nonce", "oauth_signature_method", "oauth_timestamp", "oauth_version", "oauth_token", "oauth_verifier"]

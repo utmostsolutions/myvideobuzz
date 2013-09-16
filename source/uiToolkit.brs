@@ -1,7 +1,7 @@
 
 '  uitkDoPosterMenu
 '
-'    Display "menu" items in a Poster Screen.   
+'    Display "menu" items in a Poster Screen.
 '
 Function uitkPreShowPosterMenu(ListStyle="flat-category" as String, breadA = "Home", breadB = invalid) As Object
     port=CreateObject("roMessagePort")
@@ -31,17 +31,17 @@ end function
 Function uitkDoPosterMenu(posterdata, screen, onselect_callback=invalid) As Integer
 
     if type(screen)<>"roPosterScreen" then
-        'print "illegal type/value for screen passed to uitkDoPosterMenu()" 
+        'print "illegal type/value for screen passed to uitkDoPosterMenu()"
         return -1
     end if
-    
+
     screen.SetContentList(posterdata)
 
     while true
         msg = wait(0, screen.GetMessagePort())
-        
+
         'print "uitkDoPosterMenu | msg type = ";type(msg)
-        
+
         if type(msg) = "roPosterScreenEvent" then
             'print "event.GetType()=";msg.GetType(); " event.GetMessage()= "; msg.GetMessage()
             if msg.isListItemSelected() then
@@ -55,7 +55,7 @@ Function uitkDoPosterMenu(posterdata, screen, onselect_callback=invalid) As Inte
                             userdata1=selected_callback[1]
                             userdata2=selected_callback[2]
                             userdata3=selected_callback[3]
-                            
+
                             if userdata1=invalid then
                                 this[f]()
                             else if userdata2=invalid then
@@ -108,17 +108,17 @@ end function
 Function uitkDoListMenu(posterdata, screen, onselect_callback=invalid) As Integer
 
     if type(screen)<>"roListScreen" then
-        'print "illegal type/value for screen passed to uitkDoListMenu()" 
+        'print "illegal type/value for screen passed to uitkDoListMenu()"
         return -1
     end if
-    
+
     screen.SetContent(posterdata)
 
     while true
         msg = wait(0, screen.GetMessagePort())
-        
+
         'print "uitkDoPosterMenu | msg type = ";type(msg)
-        
+
         if type(msg) = "roListScreenEvent" then
             'print "event.GetType()=";msg.GetType(); " Event.GetMessage()= "; msg.GetMessage()
             if msg.isListItemSelected() then
@@ -132,7 +132,7 @@ Function uitkDoListMenu(posterdata, screen, onselect_callback=invalid) As Intege
                             userdata1=selected_callback[1]
                             userdata2=selected_callback[2]
                             userdata3=selected_callback[3]
-                            
+
                             if userdata1=invalid then
                                 this[f]()
                             else if userdata2=invalid then
@@ -166,7 +166,7 @@ Function uitkDoListMenu(posterdata, screen, onselect_callback=invalid) As Intege
 End Function
 
 
-Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_callback) As Integer  
+Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_callback) As Integer
     'Set current category to first in list
     category_idx=0
     contentlist = []
@@ -175,9 +175,9 @@ Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_call
     contentdata1=content_callback[0]
     contentdata2=content_callback[1]
     content_f=content_callback[2]
-    
+
     contentlist=content_f(contentdata1, contentdata2, 0)
-    
+
     if contentlist.Count()=0 then
         screen.SetContentList([])
         screen.clearmessage()
@@ -187,7 +187,7 @@ Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_call
         screen.clearmessage()
     end if
     screen.Show()
-    
+
     while true
         msg = wait(0, screen.GetMessagePort())
         if type(msg) = "roPosterScreenEvent" then
@@ -196,9 +196,9 @@ Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_call
                 contentdata1=content_callback[0]
                 contentdata2=content_callback[1]
                 content_f=content_callback[2]
-                
+
                 contentlist=content_f(contentdata1, contentdata2, category_idx)
-    
+
                 if contentlist.Count()=0 then
                     screen.SetContentList([])
                     screen.ShowMessage("No viewable content in this section")
@@ -210,7 +210,7 @@ Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_call
                 userdata1=onclick_callback[0]
                 userdata2=onclick_callback[1]
                 content_f=onclick_callback[2]
-                
+
                 contentlist=content_f(userdata1, userdata2, contentlist, category_idx, msg.GetIndex())
                 if contentlist.Count()<>0 then
                     screen.SetContentList(contentlist)

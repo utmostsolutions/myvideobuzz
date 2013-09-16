@@ -146,17 +146,17 @@ End Function
 Function getKeyboardInput(title As String, search_text As String, submit_text="Submit" As String, cancel_text="Cancel" As String)
     screen=CreateObject("roKeyboardScreen")
     port=CreateObject("roMessagePort")
-    
+
     screen.SetMessagePort(port)
     screen.SetTitle(title)
     screen.SetDisplayText(search_text)
     screen.AddButton(1, submit_text)
     screen.AddButton(2, cancel_text)
     screen.Show()
-    
+
     while true
         msg = wait(0, screen.GetMessagePort())
-        
+
         if type(msg) = "roKeyboardScreenEvent"
             if msg.isScreenClosed()
                 return invalid
