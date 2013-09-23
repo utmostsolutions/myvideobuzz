@@ -102,7 +102,7 @@ End Function
 
 
 Function uitkPreShowListMenu(breadA=invalid, breadB=invalid) As Object
-    port=CreateObject("roMessagePort")
+    port = CreateObject("roMessagePort")
     screen = CreateObject("roListScreen")
     screen.SetMessagePort(port)
     if (breadA <> invalid and breadB <> invalid) then

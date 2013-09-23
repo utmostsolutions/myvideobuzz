@@ -13,6 +13,17 @@ Function InitYouTube() As Object
     this.protocol = "http"
     this.scope = this.protocol + "://gdata.youtube.com"
     this.prefix = this.scope + "/feeds/api"
+    this.currentURL = ""
+    this.searchLengthFilter = ""
+    tmpLength = RegRead("length", "Search")
+    if (tmpLength <> invalid) then
+        this.searchLengthFilter = tmpLength
+    end if
+    this.searchDateFilter = ""
+    tmpDate = RegRead("date", "Search")
+    if (tmpDate <> invalid) then
+        this.searchDateFilter = tmpDate
+    end if
     'this.FieldsToInclude = "&fields=entry(title,author,link,gd:rating,media:group(media:category,media:description,media:thumbnail,yt:videoid))"
 
     this.CurrentPageTitle = ""
@@ -25,12 +36,6 @@ Function InitYouTube() As Object
     'Search
     this.SearchYouTube = youtube_search
 
-    'History
-    this.BrowseHistory = youtube_history
-
-    'Featured
-    this.BrowseFeatured = youtube_featured
-
     'Favorites
     this.BrowseFavorites = youtube_browse_favorites
     this.AddToFavorites = youtube_add_favorite
@@ -41,9 +46,6 @@ Function InitYouTube() As Object
 
     'related
     this.ShowRelatedVideos = youtube_related_videos
-
-    'Play All
-    this.PlayAllVideos = youtube_playall_videos
 
     'Videos
     this.DisplayVideoList = youtube_display_video_list
@@ -65,18 +67,17 @@ Function InitYouTube() As Object
     this.About = youtube_about
     this.AddAccount = youtube_add_account
 
-    'print "YouTube: init complete"
     return this
 End Function
 
 
-Function youtube_exec_api(request As Dynamic, username="default" As Dynamic) As Object
+Function youtube_exec_api(request As Dynamic, username = "default" As Dynamic) As Object
     'oa = Oauth()
 
     if (username = invalid) then
-        username=""
+        username = ""
     else
-        username="users/"+username+"/"
+        username = "users/" + username + "/"
     end if
 
     method = "GET"
@@ -99,6 +100,9 @@ Function youtube_exec_api(request As Dynamic, username="default" As Dynamic) As 
             method = request.method
         end if
     end if
+
+    ' Cache the current URL for refresh operations
+    m.currentURL = url_stub
 
     if (Instr(0, url_stub, "http://") OR Instr(0, url_stub, "https://")) then
         http = NewHttp(url_stub)
@@ -166,86 +170,6 @@ Function handleYoutubeError(rsp) As Dynamic
     return error
 End Function
 
-
-'********************************************************************
-'********************************************************************
-'***** YouTube
-'***** Search
-'********************************************************************
-'********************************************************************
-Sub youtube_search()
-    port=CreateObject("roMessagePort")
-    screen=CreateObject("roSearchScreen")
-    screen.SetMessagePort(port)
-
-    history=CreateObject("roSearchHistory")
-    screen.SetSearchTerms(history.GetAsArray())
-
-    screen.Show()
-
-    while (true)
-        msg = wait(0, port)
-
-        if (type(msg) = "roSearchScreenEvent") then
-            'print "Event: "; msg.GetType(); " msg: "; msg.GetMessage()
-            if (msg.isScreenClosed()) then
-                return
-            else if (msg.isPartialResult()) then
-                screen.SetSearchTermHeaderText("Suggestions:")
-                screen.SetClearButtonEnabled(false)
-                screen.SetSearchTerms(GenerateSearchSuggestions(msg.GetMessage()))
-            else if (msg.isFullResult()) then
-                keyword = msg.GetMessage()
-                dialog = ShowPleaseWait("Please wait","Searching YouTube for "+Quote()+keyword+Quote())
-                xml = m.ExecServerAPI("videos?q="+keyword,invalid)["xml"]
-                if (not(isxmlelement(xml))) then
-                    dialog.Close()
-                    ShowConnectionFailed()
-                    return
-                end if
-                videos = m.newVideoListFromXML(xml.entry)
-                if (videos.Count() > 0) then
-                    history.Push(keyword)
-                    screen.AddSearchTerm(keyword)
-                    dialog.Close()
-                    m.DisplayVideoList(videos, "Search Results for "+Chr(39)+keyword+Chr(39), xml.link, invalid)
-                else
-                    dialog.Close():ShowErrorDialog("No videos match your search","Search results")
-                end if
-            else if (msg.isCleared()) then
-                history.Clear()
-            end if
-        end if
-    end while
-End Sub
-
-
-Function GenerateSearchSuggestions(partSearchText As String) As Object
-    suggestions = CreateObject("roArray", 1, true)
-    length = len(partSearchText)
-    if (length > 0) then
-        searchRequest = CreateObject("roUrlTransfer")
-        searchRequest.SetURL("http://suggestqueries.google.com/complete/search?hl=en&client=youtube&hjson=t&ds=yt&jsonp=window.yt.www.suggest.handleResponse&q=" + URLEncode(partSearchText))
-        jsonAsString = searchRequest.GetToString()
-        jsonAsString = strReplace(jsonAsString,"window.yt.www.suggest.handleResponse(","")
-        jsonAsString = Left(jsonAsString, Len(jsonAsString) -1)
-        response = simpleJSONParser(jsonAsString)
-
-        if (islist(response) = true) then
-            if (response.Count() > 1) then
-                for each sugg in response[1]
-                        suggestions.Push(sugg[0])
-                end for
-            end if
-        end if
-
-    else
-        history=CreateObject("roSearchHistory")
-        suggestions = history.GetAsArray()
-    end if
-    return suggestions
-End Function
-
 '********************************************************************
 '********************************************************************
 '***** YouTube
@@ -258,7 +182,7 @@ End Sub
 
 Sub youtube_add_favorite(video As Object, buttons={} As Object)
 
-    dialog=ShowPleaseWait("Adding to Favorites...", invalid)
+    dialog = ShowPleaseWait("Adding to Favorites...", invalid)
 
     xml = CreateObject("roXMLElement")
     xml.SetName("entry")
@@ -320,29 +244,6 @@ End Sub
 '********************************************************************
 '********************************************************************
 '***** YouTube
-'***** History
-'********************************************************************
-'********************************************************************
-Sub youtube_history()
-
-End Sub
-
-
-'********************************************************************
-'********************************************************************
-'***** YouTube
-'***** Featured
-'********************************************************************
-'********************************************************************
-Sub youtube_featured()
-    'm.FetchVideoList("standardfeeds/recently_featured", "Featured", invalid)
-    m.FetchVideoList("users/vvarkala/playlists?v=2&max-results=50", "Featured", invalid, true)
-End Sub
-
-
-'********************************************************************
-'********************************************************************
-'***** YouTube
 '***** User uploads
 '********************************************************************
 '********************************************************************
@@ -365,18 +266,6 @@ End Sub
 '********************************************************************
 '********************************************************************
 '***** YouTube
-'***** Play All Videos
-'********************************************************************
-'********************************************************************
-Sub youtube_playall_videos(video As Object)
-    m.FetchVideoList("users/"+userID+"/uploads?orderby=published", "Videos By "+username, invalid)
-End Sub
-
-
-
-'********************************************************************
-'********************************************************************
-'***** YouTube
 '***** Poster/Video List Utils
 '********************************************************************
 '********************************************************************
@@ -387,7 +276,7 @@ Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As
     '    fields = "?"+Mid(fields, 2)
     'end if
 
-    screen=uitkPreShowPosterMenu("flat-episodic-16x9", title)
+    screen = uitkPreShowPosterMenu("flat-episodic-16x9", title)
     screen.showMessage("Loading...")
 
     response = m.ExecServerAPI(APIRequest, username)
@@ -414,7 +303,7 @@ End Sub
 
 
 Function youtube_return_video(APIRequest As Dynamic, title As String, username As Dynamic)
-    xml=m.ExecServerAPI(APIRequest, username)["xml"]
+    xml = m.ExecServerAPI(APIRequest, username)["xml"]
     if (not(isxmlelement(xml))) then
         ShowConnectionFailed()
         return []
