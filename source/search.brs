@@ -8,7 +8,7 @@ Sub youtube_search()
 
     history = CreateObject("roSearchHistory")
     screen.SetSearchTerms(history.GetAsArray())
-
+    screen.SetBreadcrumbText("", "Hit the * button for search options")
     screen.Show()
 
     while (true)
@@ -48,15 +48,18 @@ Sub youtube_search()
                     dialog.Close()
                     m.DisplayVideoList(videos, "Search Results for " + Chr(39) + keyword + Chr(39), xml.link, invalid)
                 else
-                    dialog.Close():ShowErrorDialog("No videos match your search","Search results")
+                    dialog.Close()
+                    ShowErrorDialog("No videos match your search", "Search results")
                 end if
             else if (msg.isCleared()) then
                 history.Clear()
-            else if (msg.isRemoteKeyPressed()) then
-                if (msg.GetIndex() = 10) then ' Info button (the star button)
-                    SearchOptionDialog()
-                end if
+            else if ((msg.isRemoteKeyPressed() AND msg.GetIndex() = 10) OR msg.isButtonInfo()) then
+                SearchOptionDialog()
+            'else
+                'print("Unhandled event on search screen")
             end if
+        'else
+            'print("Unhandled msg type: " + type(msg))
         end if
     end while
 End Sub
