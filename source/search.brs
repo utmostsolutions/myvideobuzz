@@ -34,6 +34,10 @@ Sub youtube_search()
                     query = query + "&time=" + strReplace(LCase(m.searchDateFilter), " ", "_")
                     prompt = prompt + Chr(10) + "Timeframe: " + m.searchDateFilter
                 end if
+                if (m.searchSort <> "") then
+                    query = query + "&orderby=" + m.searchSort
+                    prompt = prompt + Chr(10) + "Sort: " + GetSortText(m.searchSort)
+                end if
                 dialog = ShowPleaseWait("Please wait", prompt)
                 xml = m.ExecServerAPI(query, invalid)["xml"]
                 if (not(isxmlelement(xml))) then
@@ -100,7 +104,8 @@ Function SearchOptionDialog() as Integer
     dialog.EnableBackButton(false)
     dialog.addButton(1, "Change Length Filter")
     dialog.addButton(2, "Change Time Filter")
-    dialog.addButton(3, "Done")
+    dialog.addButton(3, "Change Sort Setting")
+    dialog.addButton(4, "Done")
     dialog.Show()
     while true
         ' print("waiting")
@@ -132,6 +137,17 @@ Function SearchOptionDialog() as Integer
                         updateSearchDialogText(dialog, true)
                     end if
                 else if (dlgMsg.GetIndex() = 3) then
+                    ret = SearchSortClicked()
+                    if (ret <> "ignore") then
+                        m.youtube.searchSort = ret
+                        if (ret <> "") then
+                            RegWrite("sort", ret, "Search")
+                        else
+                            RegDelete("sort", "Search")
+                        end if
+                        updateSearchDialogText(dialog, true)
+                    end if
+                else if (dlgMsg.GetIndex() = 4) then
                     dialog.Close()
                     exit while
                 end if
@@ -154,13 +170,17 @@ End Function
 Sub updateSearchDialogText(dialog as Object, isUpdate = false as Boolean)
     searchLengthText = "None"
     searchDateText = "None"
+    searchSortText = "None"
     if (m.youtube.searchLengthFilter <> "") then
         searchLengthText = m.youtube.searchLengthFilter
     end if
     if (m.youtube.searchDateFilter <> "") then
         searchDateText = m.youtube.searchDateFilter
     end if
-    dialogText = "Length: " + searchLengthText + chr(10) + "Timeframe: " + searchDateText
+    if (m.youtube.searchSort <> "") then
+        searchSortText = GetSortText(m.youtube.searchSort)
+    end if
+    dialogText = "Length: " + searchLengthText + chr(10) + "Timeframe: " + searchDateText + chr(10) + "Sort: " + searchSortText
     if (isUpdate = true) then
         dialog.UpdateText(dialogText)
     else
@@ -251,5 +271,60 @@ Function SearchDateClicked() as String
     end while
     dialog.Close()
     ' print ("Exiting SearchDateClicked")
+    return retVal
+End Function
+
+Function SearchSortClicked() as String
+    dialog = CreateObject("roMessageDialog")
+    port = CreateObject("roMessagePort")
+    dialog.SetMessagePort(port)
+    dialog.SetTitle("Sort Options")
+    dialog.EnableBackButton(false)
+    dialog.addButton(1, "None")
+    dialog.addButton(2, "Newest First")
+    dialog.addButton(3, "Views (most to least)")
+    dialog.addButton(4, "Rating (highest to lowest)")
+    if (m.youtube.searchSort = "published") then
+        dialog.SetFocusedMenuItem(1)
+    else if (m.youtube.searchSort = "viewCount") then
+        dialog.SetFocusedMenuItem(2)
+    else if (m.youtube.searchSort = "rating") then
+        dialog.SetFocusedMenuItem(3)
+    end if
+    dialog.Show()
+    retVal = "ignore"
+    while true
+        dlgMsg = wait(0, dialog.GetMessagePort())
+        if (type(dlgMsg) = "roMessageDialogEvent") then
+            if (dlgMsg.isButtonPressed()) then
+                if (dlgMsg.GetIndex() = 1) then
+                    retVal = ""
+                else if (dlgMsg.GetIndex() = 2) then
+                    retVal = "published"
+                else if (dlgMsg.GetIndex() = 3) then
+                    retVal = "viewCount"
+                else if (dlgMsg.GetIndex() = 4) then
+                    retVal = "rating"
+                end if
+                exit while
+            else if (dlgMsg.isScreenClosed()) then
+                exit while
+            end if
+        end if
+    end while
+    dialog.Close()
+    ' print ("Exiting SearchSortClicked")
+    return retVal
+End Function
+
+Function GetSortText(internalValue as String) as String
+    retVal = "None"
+    if (m.youtube.searchSort = "published") then
+        retVal = "Newest First"
+    else if (m.youtube.searchSort = "viewCount") then
+        retVal = "Views"
+    else if (m.youtube.searchSort = "rating") then
+        retVal = "Rating"
+    end if
     return retVal
 End Function

@@ -24,7 +24,12 @@ Function InitYouTube() As Object
     if (tmpDate <> invalid) then
         this.searchDateFilter = tmpDate
     end if
-    'this.FieldsToInclude = "&fields=entry(title,author,link,gd:rating,media:group(media:category,media:description,media:thumbnail,yt:videoid))"
+
+    this.searchSort = ""
+    tmpSort = RegRead("sort", "Search")
+    if (tmpSort <> invalid) then
+        this.searchSort = tmpSort
+    end if
 
     this.CurrentPageTitle = ""
     this.screen=invalid
