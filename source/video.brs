@@ -41,11 +41,6 @@ Function InitYouTube() As Object
     'Search
     this.SearchYouTube = youtube_search
 
-    'Favorites
-    this.BrowseFavorites = youtube_browse_favorites
-    this.AddToFavorites = youtube_add_favorite
-    this.removeFavorite = youtube_remove_favorite
-
     'User videos
     this.BrowseUserVideos = youtube_user_videos
 
@@ -63,7 +58,6 @@ Function InitYouTube() As Object
     'Categories
     this.CategoriesListFromXML  = youtube_new_video_cat_list
 
-    this.UpdateButtons = update_buttons
     this.BuildButtons = build_buttons
 
     'Settings
@@ -184,67 +178,6 @@ End Function
 Sub youtube_browse_favorites()
     m.FetchVideoList("favorites", "Favorites", "default")
 End Sub
-
-Sub youtube_add_favorite(video As Object, buttons={} As Object)
-
-    dialog = ShowPleaseWait("Adding to Favorites...", invalid)
-
-    xml = CreateObject("roXMLElement")
-    xml.SetName("entry")
-    xml.AddAttribute("xmlns", "http://www.w3.org/2005/Atom")
-    xml.AddElementWithBody("id", video.id)
-    xml = xml.GenXML(true)
-
-    request = CreateObject("roAssociativeArray")
-    headers = CreateObject("roAssociativeArray")
-    headers["Content-Type"] = "application/atom+xml"
-    request.url_stub = "favorites"
-    request.postdata = xml
-    request.headers = headers
-
-    response=m.ExecServerAPI(request, "default")
-
-    dialog.Close()
-
-    if (tostr(response.error) = "" and int(response.status) = 201) then
-        ShowDialog1Button("Added", "The video was added to your favorites.", "OK")
-        m.video.EditLink=get_xml_edit_link(response.xml)
-        m.UpdateButtons(buttons)
-        m.screen.AddButton(3, "remove from Favorites")
-    else
-        ' this is a really awful way to handle
-        ' checking favorites and i should be ashamed
-        if (tostr(response.error) = "Video already in favorite list.") then
-            do = ShowDialog2Buttons("Notice", "This video is already in your favorites. If you would like to remove it, visit the Favorites section from the main menu.", "OK", "Go To Favorites")
-            if (do = 1) then
-                m.BrowseFavorites()
-            end if
-        end if
-    end if
-
-End Sub
-
-Sub youtube_remove_favorite(video As Object, buttons={} As Object)
-
-    dialog=ShowPleaseWait("removing Favorite...", invalid)
-
-    request = CreateObject("roAssociativeArray")
-    request.url_stub = video.EditLink
-    request.method = "DELETE"
-
-    response=m.ExecServerAPI(request, "default")
-
-    dialog.Close()
-
-    if (tostr(response.error) = "" and int(response.status) = 200) then
-        ShowDialog1Button("removed", "The video was removed from your favorites.", "OK")
-        m.UpdateButtons(buttons)
-        m.screen.AddButton(2, "Add to Favorites")
-    end if
-
-
-End Sub
-
 
 '********************************************************************
 '********************************************************************
@@ -657,12 +590,6 @@ Sub youtube_display_video_springboard(theVideo As Object, breadcrumb As String, 
                     m.ShowRelatedVideos(m.video)
                 else if (msg.GetIndex() = 3) then
                     m.BrowseUserVideos(m.video.Author, m.video.UserID)
-                else if (msg.GetIndex() = 4) then
-                    m.BrowseUserVideos(m.video.Author, m.video.UserID)
-                else if (msg.GetIndex() = 5) then
-                    m.AddToFavorites(m.video, buttons)
-                else if (msg.GetIndex() = 6) then
-                    m.removeFavorite(m.video, buttons)
                 end if
             else if (msg.isRemoteKeyPressed()) then
                 if (msg.GetIndex() = 4) then  ' left
@@ -695,16 +622,6 @@ Sub youtube_display_video_springboard(theVideo As Object, breadcrumb As String, 
     end while
 End Sub
 
-Sub update_buttons(buttons)
-    m.screen.ClearButtons()
-    if (buttons["play"] <> invalid) then
-        m.screen.AddButton(0, "Play")
-    end if
-    if (buttons["more"] <> invalid) then
-        m.screen.AddButton(1, "More Videos By " + m.video.Author)
-    end if
-End Sub
-
 '********************************************************************
 ' Helper function to build the list of buttons on the springboard
 ' @return an roAssociativeArray of the buttons
@@ -717,12 +634,6 @@ Function build_buttons() as Object
     buttons["play_all"]     = m.screen.AddButton(1, "Play All")
     buttons["show_related"] = m.screen.AddButton(2, "Show Related Videos")
     buttons["more"]         = m.screen.AddButton(3, "More Videos By " + m.video.Author)
-
-    'if m.video.EditLink<>invalid then
-        'buttons["fav_'"] = screen.AddButton(3, "remove from Favorites")
-    'else
-        'buttons["fav_add"] = screen.AddButton(2, "Add to Favorites")
-    'end if
     return buttons
 End Function
 
