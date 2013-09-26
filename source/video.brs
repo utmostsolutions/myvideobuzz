@@ -172,16 +172,6 @@ End Function
 '********************************************************************
 '********************************************************************
 '***** YouTube
-'***** Favorites
-'********************************************************************
-'********************************************************************
-Sub youtube_browse_favorites()
-    m.FetchVideoList("favorites", "Favorites", "default")
-End Sub
-
-'********************************************************************
-'********************************************************************
-'***** YouTube
 '***** User uploads
 '********************************************************************
 '********************************************************************
@@ -207,7 +197,7 @@ End Sub
 '***** Poster/Video List Utils
 '********************************************************************
 '********************************************************************
-Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As Dynamic,categories=false)
+Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As Dynamic, categories=false, message = "Loading..." as String)
 
     'fields = m.FieldsToInclude
     'if Instr(0, APIRequest, "?") = 0 then
@@ -215,7 +205,7 @@ Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As
     'end if
 
     screen = uitkPreShowPosterMenu("flat-episodic-16x9", title)
-    screen.showMessage("Loading...")
+    screen.showMessage(message)
 
     response = m.ExecServerAPI(APIRequest, username)
     if (response.status = 403) then

@@ -58,7 +58,8 @@ Sub youtube_search()
             else if (msg.isCleared()) then
                 history.Clear()
             else if ((msg.isRemoteKeyPressed() AND msg.GetIndex() = 10) OR msg.isButtonInfo()) then
-                SearchOptionDialog()
+                while (SearchOptionDialog() = 1)
+                end while
             'else
                 'print("Unhandled event on search screen")
             end if
@@ -101,20 +102,18 @@ Function SearchOptionDialog() as Integer
     dialog.SetMessagePort(port)
     dialog.SetTitle("Search Settings")
     updateSearchDialogText(dialog)
-    dialog.EnableBackButton(false)
+    dialog.EnableBackButton(true)
     dialog.addButton(1, "Change Length Filter")
     dialog.addButton(2, "Change Time Filter")
     dialog.addButton(3, "Change Sort Setting")
     dialog.addButton(4, "Done")
     dialog.Show()
     while true
-        ' print("waiting")
-        ' WORKAROUND: Until I get back button issue fixed, this'll have to do.
-        dlgMsg = wait(10000, dialog.GetMessagePort())
-        ' print("Got one")
+        dlgMsg = wait(0, dialog.GetMessagePort())
         if (type(dlgMsg) = "roMessageDialogEvent") then
             if (dlgMsg.isButtonPressed()) then
                 if (dlgMsg.GetIndex() = 1) then
+                    dialog.Close()
                     ret = SearchFilterClicked()
                     if (ret <> "ignore") then
                         m.youtube.searchLengthFilter = ret
@@ -125,7 +124,9 @@ Function SearchOptionDialog() as Integer
                         end if
                         updateSearchDialogText(dialog, true)
                     end if
+                    return 1 ' Re-open the options
                 else if (dlgMsg.GetIndex() = 2) then
+                    dialog.Close()
                     ret = SearchDateClicked()
                     if (ret <> "ignore") then
                         m.youtube.searchDateFilter = ret
@@ -136,7 +137,9 @@ Function SearchOptionDialog() as Integer
                         end if
                         updateSearchDialogText(dialog, true)
                     end if
+                    return 1 ' Re-open the options
                 else if (dlgMsg.GetIndex() = 3) then
+                    dialog.Close()
                     ret = SearchSortClicked()
                     if (ret <> "ignore") then
                         m.youtube.searchSort = ret
@@ -147,6 +150,7 @@ Function SearchOptionDialog() as Integer
                         end if
                         updateSearchDialogText(dialog, true)
                     end if
+                    return 1 ' Re-open the options
                 else if (dlgMsg.GetIndex() = 4) then
                     dialog.Close()
                     exit while
@@ -193,7 +197,7 @@ Function SearchFilterClicked() as String
     port = CreateObject("roMessagePort")
     dialog.SetMessagePort(port)
     dialog.SetTitle("Length Filter")
-    dialog.EnableBackButton(false)
+    dialog.EnableBackButton(true)
     dialog.addButton(1, "None")
     dialog.addButton(2, "Short (<4 minutes)")
     dialog.addButton(3, "Medium (>=4 and <=20 minutes)")
@@ -236,7 +240,7 @@ Function SearchDateClicked() as String
     port = CreateObject("roMessagePort")
     dialog.SetMessagePort(port)
     dialog.SetTitle("Timeframe Filter")
-    dialog.EnableBackButton(false)
+    dialog.EnableBackButton(true)
     dialog.addButton(1, "None")
     dialog.addButton(2, "Today")
     dialog.addButton(3, "This Week")
@@ -279,7 +283,7 @@ Function SearchSortClicked() as String
     port = CreateObject("roMessagePort")
     dialog.SetMessagePort(port)
     dialog.SetTitle("Sort Options")
-    dialog.EnableBackButton(false)
+    dialog.EnableBackButton(true)
     dialog.addButton(1, "None")
     dialog.addButton(2, "Newest First")
     dialog.addButton(3, "Views (most to least)")
