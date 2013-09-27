@@ -49,14 +49,14 @@ Function InitYouTube() As Object
 
     'Videos
     this.DisplayVideoList = youtube_display_video_list
-    this.FetchVideoList = youtube_fetch_video_list
+    this.FetchVideoList = FetchVideoList_impl
     this.VideoDetails = youtube_display_video_springboard
     this.newVideoListFromXML = youtube_new_video_list
     this.newVideoFromXML = youtube_new_video
     this.ReturnVideoList = youtube_return_video
 
     'Categories
-    this.CategoriesListFromXML  = youtube_new_video_cat_list
+    this.CategoriesListFromXML  = CategoriesListFromXML_impl
 
     this.BuildButtons = build_buttons
 
@@ -197,7 +197,7 @@ End Sub
 '***** Poster/Video List Utils
 '********************************************************************
 '********************************************************************
-Sub youtube_fetch_video_list(APIRequest As Dynamic, title As String, username As Dynamic, categories=false, message = "Loading..." as String)
+Sub FetchVideoList_impl(APIRequest As Dynamic, title As String, username As Dynamic, categories=false, message = "Loading..." as String)
 
     'fields = m.FieldsToInclude
     'if Instr(0, APIRequest, "?") = 0 then
@@ -330,14 +330,21 @@ End Sub
 '***** working with metadata for the poster/springboard screens
 '********************************************************************
 '********************************************************************
-Function youtube_new_video_cat_list(xmllist As Object) As Object
-    'print "youtube_new_video_cat_list init"
+Function CategoriesListFromXML_impl(xmllist As Object) As Object
+    'print "CategoriesListFromXML_impl init"
     categoryList  = CreateObject("roList")
     for each record in xmllist
         ''printAny(0, "xmllist:", record)
-        category  = CreateObject("roAssociativeArray")
-        category.title = record.GetNamedElements("title")[0].GetText()
-        category.link= validstr(record.content@src)
+        category        = CreateObject("roAssociativeArray")
+        category.title  = record.GetNamedElements("title").GetText()
+        category.link   = validstr(record.content@src)
+        
+        if (record.GetNamedElements("yt:unreadCount").Count() > 0) then
+            category.unreadCount% = record.GetNamedElements("yt:unreadCount").GetText().toInt()
+        else
+            category.unreadCount% = 0
+        end if
+        ' print (category.title + " unreadCount: " + tostr(category.unreadCount%))
 
         if (isnullorempty(category.link)) then
             links = record.link
@@ -350,6 +357,9 @@ Function youtube_new_video_cat_list(xmllist As Object) As Object
 
         categoryList.Push(category)
     next
+    Sort(categoryList, Function(obj as Object) as Integer
+            return obj.unreadCount%
+        End Function)
     return categoryList
 End Function
 

@@ -173,9 +173,9 @@ End Sub
 'Insertion Sort
 'Will sort an array directly, or use a key function
 '******************************************************
-Sub Sort(A as Object, key=invalid as dynamic)
+Sub Sort(A as Object, key = invalid as Dynamic)
 
-    if (type(A) <> "roArray") then
+    if (type(A) <> "roArray" AND type(A) <> "roList") then
         return
     end if
 
@@ -183,7 +183,7 @@ Sub Sort(A as Object, key=invalid as dynamic)
         for i = 1 to A.Count()-1
             value = A[i]
             j = i-1
-            while (j >= 0 and A[j] > value)
+            while (j >= 0 and A[j] < value)
                 A[j + 1] = A[j]
                 j = j-1
             end while
@@ -197,7 +197,7 @@ Sub Sort(A as Object, key=invalid as dynamic)
             valuekey = key(A[i])
             value = A[i]
             j = i-1
-            while (j >= 0 and key(A[j]) > valuekey)
+            while (j >= 0 and key(A[j]) < valuekey)
                 A[j + 1] = A[j]
                 j = j-1
             end while
