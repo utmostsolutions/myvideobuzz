@@ -43,6 +43,9 @@ Function InitYouTube() As Object
 
     'User videos
     this.BrowseUserVideos = youtube_user_videos
+    
+    ' Playlists
+    this.BrowseUserPlaylists = BrowseUserPlaylists_impl
 
     'related
     this.ShowRelatedVideos = youtube_related_videos
@@ -170,21 +173,21 @@ Function handleYoutubeError(rsp) As Dynamic
 End Function
 
 '********************************************************************
-'********************************************************************
-'***** YouTube
-'***** User uploads
-'********************************************************************
+' YouTube User uploads
 '********************************************************************
 Sub youtube_user_videos(username As String, userID As String)
     m.FetchVideoList("users/"+userID+"/uploads?orderby=published", "Videos By "+username, invalid)
 End Sub
 
+'********************************************************************
+' YouTube User Playlists
+'********************************************************************
+Sub BrowseUserPlaylists_impl(username As String, userID As String)
+    m.FetchVideoList("users/" + userID + "/playlists?max-results=50", username + "'s Playlists", invalid, true)
+End Sub
 
 '********************************************************************
-'********************************************************************
-'***** YouTube
-'***** Related Videos
-'********************************************************************
+' YouTube Related Videos
 '********************************************************************
 Sub youtube_related_videos(video As Object)
     m.FetchVideoList("videos/"+ video.id +"/related?v=2", "Related Videos", invalid)
@@ -192,10 +195,7 @@ Sub youtube_related_videos(video As Object)
 End Sub
 
 '********************************************************************
-'********************************************************************
-'***** YouTube
-'***** Poster/Video List Utils
-'********************************************************************
+' YouTube Poster/Video List Utils
 '********************************************************************
 Sub FetchVideoList_impl(APIRequest As Dynamic, title As String, username As Dynamic, categories=false, message = "Loading..." as String)
 
@@ -259,9 +259,6 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
         screen.showMessage("Loading...")
     end if
     m.CurrentPageTitle = title
-
-    'content_callback=[ff_data, m, function(ff_data, smugmug, cat_idx):return smugmug.getFFMetaData(ff_data[cat_idx]):end function]
-    'onclick_callback=[ff_data, m, function(ff_data, smugmug, cat_idx, set_idx):smugmug.DisplayFriendsFamily(ff_data[cat_idx][set_idx]):end function]
 
     if (categories <> invalid) then
         categoryList = CreateObject("roArray", 100, true)
@@ -392,7 +389,8 @@ Function youtube_new_video(xml As Object) As Object
     video.GetTitle      = function():return m.xml.title[0].GetText():end function
     video.GetCategory   = function():return m.xml.GetNamedElements("media:group")[0].GetNamedElements("media:category")[0].GetText():end function
     video.GetDesc       = get_desc
-    video.GetLength     = get_length
+    video.GetLength     = GetLength_impl
+    video.GetUploadDate = GetUploadDate_impl
     video.GetRating     = get_xml_rating
     video.GetThumb      = get_xml_thumb
     video.GetEditLink   = get_xml_edit_link
@@ -424,6 +422,7 @@ Function GetVideoMetaData(videos As Object)
         meta.xml                    = video.xml
         meta.UserID                 = video.GetUserID()
         meta.EditLink               = video.GetEditLink(video.xml)
+        meta.ReleaseDate            = video.GetUploadDate()
 
         meta.StreamFormat           = "mp4"
         meta.Live                   = false
@@ -451,11 +450,30 @@ End Function
 '  Returns the length of the video from the yt:duration element:
 '  <yt:duration seconds=val>
 '*******************************************
-Function get_length() As Dynamic
+Function GetLength_impl() As Dynamic
     durations = m.xml.GetNamedElements("media:group")[0].GetNamedElements("yt:duration")
     if (durations.Count() > 0) then
         return durations.GetAttributes()["seconds"]
     end if
+    return "0"
+End Function
+
+'*******************************************
+'  Returns the date the video was uploaded, from the yt:uploaded element:
+'  <yt:uploaded>val</yt:uploaded>
+'*******************************************
+Function GetUploadDate_impl() As Dynamic
+    uploaded = m.xml.GetNamedElements("media:group")[0].GetNamedElements("yt:uploaded")
+    if (uploaded.Count() > 0) then
+        dateText = uploaded.GetText()
+        'dateObj = CreateObject("roDateTime")
+        ' The value from YouTube has a 'Z' at the end, we need to strip this off, or else
+        ' FromISO8601String() can't parse the date properly
+        'dateObj.FromISO8601String(Left(dateText, Len(dateText) - 1))
+        'return tostr(dateObj.GetMonth()) + "/" + tostr(dateObj.GetDayOfMonth()) + "/" + tostr(dateObj.GetYear())
+        return Left(dateText, 10)
+    end if
+    return ""
 End Function
 
 '*******************************************
@@ -502,7 +520,7 @@ End Function
 
 Function get_xml_rating() As Dynamic
     if (m.xml.GetNamedElements("gd:rating").Count() > 0) then
-        return m.xml.GetNamedElements("gd:rating").GetAttributes()["average"].toInt() * 20
+        return Int(m.xml.GetNamedElements("gd:rating").GetAttributes()["average"].toFloat() * 20)
     end if
     return invalid
 End Function
@@ -535,10 +553,7 @@ End Function
 
 
 '********************************************************************
-'********************************************************************
-'***** YouTube
-'***** video details screen
-'********************************************************************
+' YouTube video details screen
 '********************************************************************
 Sub youtube_display_video_springboard(theVideo As Object, breadcrumb As String, videos=invalid, idx=invalid)
     'print "Displaying video springboard"
@@ -590,6 +605,8 @@ Sub youtube_display_video_springboard(theVideo As Object, breadcrumb As String, 
                     m.ShowRelatedVideos(m.video)
                 else if (msg.GetIndex() = 3) then
                     m.BrowseUserVideos(m.video.Author, m.video.UserID)
+                else if (msg.GetIndex() = 4) then
+                    m.BrowseUserPlaylists(m.video.Author, m.video.UserID)
                 end if
             else if (msg.isRemoteKeyPressed()) then
                 if (msg.GetIndex() = 4) then  ' left
@@ -634,6 +651,7 @@ Function build_buttons() as Object
     buttons["play_all"]     = m.screen.AddButton(1, "Play All")
     buttons["show_related"] = m.screen.AddButton(2, "Show Related Videos")
     buttons["more"]         = m.screen.AddButton(3, "More Videos By " + m.video.Author)
+    buttons["playlists"]    = m.screen.AddButton(4, "Show user's playlists")
     return buttons
 End Function
 
@@ -670,10 +688,7 @@ End Function
 
 
 '********************************************************************
-'********************************************************************
-'***** YouTube
-'***** Get direct MP4 video URLs from YouTube's formats map
-'********************************************************************
+' YouTube Get direct MP4 video URLs from YouTube's formats map
 '********************************************************************
 Function parseVideoFormatsMap(videoInfo As String) As Object
 
