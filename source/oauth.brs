@@ -100,7 +100,7 @@ End Function
 '**
 '*********************************************************
 Function oauth_add_params(http As Object) As Void
-    http.removeParam("oauth_signature")
+    http.RemoveParam("oauth_signature")
     m.datetime.mark() 'so that m.datetime.asSeconds() retrieves the current time
     keyvalues = [ m.consumerkey, itostr(rnd(999999999)), "HMAC-SHA1", itostr(m.datetime.asSeconds()), m.version ]
     if (http.accessVerifier) then

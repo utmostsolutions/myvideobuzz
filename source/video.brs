@@ -51,9 +51,9 @@ Function InitYouTube() As Object
     this.ShowRelatedVideos = youtube_related_videos
 
     'Videos
-    this.DisplayVideoList = youtube_display_video_list
+    this.DisplayVideoList = DisplayVideoList_impl
     this.FetchVideoList = FetchVideoList_impl
-    this.VideoDetails = youtube_display_video_springboard
+    this.VideoDetails = VideoDetails_impl
     this.newVideoListFromXML = youtube_new_video_list
     this.newVideoFromXML = youtube_new_video
     this.ReturnVideoList = youtube_return_video
@@ -134,7 +134,7 @@ Function youtube_exec_api(request As Dynamic, username = "default" As Dynamic) A
     'print rsp
     'print "----------------------------------"
 
-    xml=ParseXML(rsp)
+    xml = ParseXML(rsp)
 
     returnObj = CreateObject("roAssociativeArray")
     returnObj.xml = xml
@@ -225,7 +225,7 @@ Sub FetchVideoList_impl(APIRequest As Dynamic, title As String, username As Dyna
         m.DisplayVideoList([], title, xml.link, screen, categories)
     else
         videos = m.newVideoListFromXML(xml.entry)
-        m.DisplayVideoList(videos, title, xml.link, screen)
+        m.DisplayVideoList(videos, title, xml.link, screen, invalid)
     end if
 End Sub
 
@@ -253,7 +253,7 @@ Function youtube_return_video(APIRequest As Dynamic, title As String, username A
     return metadata
 End Function
 
-Sub youtube_display_video_list(videos As Object, title As String, links=invalid, screen=invalid, categories=invalid)
+Sub DisplayVideoList_impl(videos As Object, title As String, links=invalid, screen = invalid, categories = invalid, metadataFunc = GetVideoMetaData as Function)
     if (screen = invalid) then
         screen = uitkPreShowPosterMenu("flat-episodic-16x9", title)
         screen.showMessage("Loading...")
@@ -289,19 +289,28 @@ Sub youtube_display_video_list(videos As Object, title As String, links=invalid,
 
         uitkDoCategoryMenu(categoryList, screen, oncontent_callback, onclick_callback)
     else if (videos.Count() > 0) then
-        metadata = GetVideoMetaData(videos)
-
+        metadata = metadataFunc(videos)
         for each link in links
-            if (link@rel = "next") then
-                metadata.Push({shortDescriptionLine1: "More Results", action: "next", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_next_episode.jpg", SDPosterUrl:"pkg:/images/icon_next_episode.jpg"})
-            else if (link@rel = "previous") then
-                metadata.Unshift({shortDescriptionLine1: "Back", action: "prev", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_prev_episode.jpg", SDPosterUrl:"pkg:/images/icon_prev_episode.jpg"})
+            if (type(link) = "roXMLElement") then
+                if (link@rel = "next") then
+                    metadata.Push({shortDescriptionLine1: "More Results", action: "next", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_next_episode.jpg", SDPosterUrl:"pkg:/images/icon_next_episode.jpg"})
+                else if (link@rel = "previous") then
+                    metadata.Unshift({shortDescriptionLine1: "Back", action: "prev", pageURL: link@href, HDPosterUrl:"pkg:/images/icon_prev_episode.jpg", SDPosterUrl:"pkg:/images/icon_prev_episode.jpg"})
+                end if
+            else if (type(link) = "roAssociativeArray") then
+                if (link.type = "next") then
+                    metadata.Push({shortDescriptionLine1: "More Results", action: "next", pageURL: link.href, HDPosterUrl:"pkg:/images/icon_next_episode.jpg", SDPosterUrl:"pkg:/images/icon_next_episode.jpg", func: link.func})
+                else if (link.type = "previous") then
+                    metadata.Unshift({shortDescriptionLine1: "Back", action: "prev", pageURL: link.href, HDPosterUrl:"pkg:/images/icon_prev_episode.jpg", SDPosterUrl:"pkg:/images/icon_prev_episode.jpg", func: link.func})
+                end if
             end if
         end for
 
         onselect = [1, metadata, m,
             function(video, youtube, set_idx)
-                if (video[set_idx]["action"] <> invalid) then
+                if (video[set_idx]["func"] <> invalid) then
+                    video[set_idx]["func"](youtube, video[set_idx]["pageURL"])
+                else if (video[set_idx]["action"] <> invalid) then
                     youtube.FetchVideoList(video[set_idx]["pageURL"], youtube.CurrentPageTitle, invalid)
                 else
                     youtube.VideoDetails(video[set_idx], youtube.CurrentPageTitle, video, set_idx)
@@ -393,7 +402,6 @@ Function youtube_new_video(xml As Object) As Object
     video.GetUploadDate = GetUploadDate_impl
     video.GetRating     = get_xml_rating
     video.GetThumb      = get_xml_thumb
-    video.GetEditLink   = get_xml_edit_link
     'video.GetLinks     = function():return m.xml.GetNamedElements("link"):end function
     'video.GetURL       = video_get_url
     return video
@@ -409,21 +417,20 @@ Function GetVideoMetaData(videos As Object)
 
         meta.ID                     = video.GetID()
         meta.Author                 = video.GetAuthor()
-        meta.Title                  = video.GetTitle()
+        meta.TitleSeason            = video.GetTitle()
+        meta.Title                  = video.GetAuthor() + "  - " + get_length_as_human_readable(video.GetLength())
         meta.Actors                 = meta.Author
         meta.Description            = video.GetDesc()
         meta.Categories             = video.GetCategory()
         meta.StarRating             = video.GetRating()
-        meta.ShortDescriptionLine1  = meta.Title
-        meta.ShortDescriptionLine2  = video.GetAuthor() + "  - " + get_length_as_human_readable(video.GetLength())
+        meta.ShortDescriptionLine1  = meta.TitleSeason
+        meta.ShortDescriptionLine2  = meta.Title
         meta.SDPosterUrl            = video.GetThumb()
         meta.HDPosterUrl            = video.GetThumb()
         meta.Length                 = video.GetLength()
         meta.xml                    = video.xml
         meta.UserID                 = video.GetUserID()
-        meta.EditLink               = video.GetEditLink(video.xml)
         meta.ReleaseDate            = video.GetUploadDate()
-
         meta.StreamFormat           = "mp4"
         meta.Live                   = false
         meta.Streams                = []
@@ -525,19 +532,6 @@ Function get_xml_rating() As Dynamic
     return invalid
 End Function
 
-Function get_xml_edit_link(xml) As Dynamic
-    links = xml.GetNamedElements("link")
-    if (links.Count() > 0) then
-        for each link in links
-            ''print link.GetAttributes()["rel"]
-            if (link.GetAttributes()["rel"] = "edit") then
-                return link.GetAttributes()["href"]
-            end if
-        end for
-    end if
-    return invalid
-End Function
-
 Function get_xml_thumb() As Dynamic
     thumbs=m.xml.GetNamedElements("media:group")[0].GetNamedElements("media:thumbnail")
     if (thumbs.Count() > 0) then
@@ -553,17 +547,18 @@ End Function
 
 
 '********************************************************************
-' YouTube video details screen
+' YouTube video details roSpringboardScreen
 '********************************************************************
-Sub youtube_display_video_springboard(theVideo As Object, breadcrumb As String, videos=invalid, idx=invalid)
-    'print "Displaying video springboard"
+Sub VideoDetails_impl(theVideo As Object, breadcrumb As String, videos=invalid, idx=invalid)
     p = CreateObject("roMessagePort")
     screen = CreateObject("roSpringboardScreen")
     screen.SetMessagePort(p)
     m.screen    = screen
     m.video     = theVideo
-    ''printAny(0, "videos:", videos)
     screen.SetDescriptionStyle("movie")
+    if (theVideo.StarRating = invalid) then
+        screen.SetStaticRatingEnabled(false)
+    end if
     if (videos.Count() > 1) then
         screen.AllowNavLeft(true)
         screen.AllowNavRight(true)
@@ -649,9 +644,11 @@ Function build_buttons() as Object
 
     buttons["play"]         = m.screen.AddButton(0, "Play")
     buttons["play_all"]     = m.screen.AddButton(1, "Play All")
-    buttons["show_related"] = m.screen.AddButton(2, "Show Related Videos")
-    buttons["more"]         = m.screen.AddButton(3, "More Videos By " + m.video.Author)
-    buttons["playlists"]    = m.screen.AddButton(4, "Show user's playlists")
+    if (m.video.Author <> invalid) then
+        buttons["show_related"] = m.screen.AddButton(2, "Show Related Videos")
+        buttons["more"]         = m.screen.AddButton(3, "More Videos By " + m.video.Author)
+        buttons["playlists"]    = m.screen.AddButton(4, "Show user's playlists")
+    end if
     return buttons
 End Function
 
@@ -684,80 +681,6 @@ Function DisplayVideo(content As Object)
         end if
     end while
     return ret
-End Function
-
-
-'********************************************************************
-' YouTube Get direct MP4 video URLs from YouTube's formats map
-'********************************************************************
-Function parseVideoFormatsMap(videoInfo As String) As Object
-
-    'print "-----------------------------------------------"
-    'print videoInfo
-    'print "-----------------------------------------------"
-
-    r = CreateObject("roRegex", "(?:|&"+CHR(34)+")url_encoded_fmt_stream_map=([^(&|\$)]+)", "")
-    videoFormatsMatches = r.Match(videoInfo)
-
-    if (videoFormatsMatches[0] <> invalid) then
-        videoFormats = videoFormatsMatches[1]
-    else
-        'print "parseVideoFormatsMap: didn't find any video formats"
-        'print "---------------------------------------------------"
-        'print videoInfo
-        'print "---------------------------------------------------"
-        return invalid
-    end if
-
-    sep1 = CreateObject("roRegex", "%2C", "")
-    sep2 = CreateObject("roRegex", "%26", "")
-    sep3 = CreateObject("roRegex", "%3D", "")
-
-    videoURL = CreateObject("roAssociativeArray")
-    videoFormatsGroup = sep1.Split(videoFormats)
-
-    for each videoFormat in videoFormatsGroup
-        videoFormatsElem = sep2.Split(videoFormat)
-        videoFormatsPair = CreateObject("roAssociativeArray")
-        for each elem in videoFormatsElem
-            pair = sep3.Split(elem)
-            if (pair.Count() = 2) then
-                videoFormatsPair[pair[0]] = pair[1]
-            end if
-        end for
-
-        if (videoFormatsPair["url"] <> invalid) then
-            r1=CreateObject("roRegex", "\\\/", ""):r2=CreateObject("roRegex", "\\u0026", "")
-            url=URLDecode(URLDecode(videoFormatsPair["url"]))
-            r1.ReplaceAll(url, "/"):r2.ReplaceAll(url, "&")
-        end if
-        if (videoFormatsPair["itag"] <> invalid) then
-            itag = videoFormatsPair["itag"]
-        end if
-        if (videoFormatsPair["sig"] <> invalid) then
-            sig = videoFormatsPair["sig"]
-            url = url + "&signature=" + sig
-        end if
-
-        if (Instr(0, LCase(url), "http") = 1) then
-            videoURL[itag] = url
-        end if
-    end for
-
-    qualityOrder = ["18","22","37"]
-    bitrates = [768,2250,3750]
-    isHD = [false,true,true]
-    streamQualities = []
-
-    for i=0 to qualityOrder.Count()-1
-        qn = qualityOrder[i]
-        if (videoURL[qn] <> invalid) then
-            streamQualities.Push({url: videoURL[qn], bitrate: bitrates[i], quality: isHD[i], contentid: qn})
-        end if
-    end for
-
-    return streamQualities
-
 End Function
 
 function getMP4Url(video as Object, timeout = 0 as integer, loginCookie = "" as string) as object

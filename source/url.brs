@@ -35,7 +35,7 @@ Function NewHttp(url As String, port=invalid As Dynamic, method="GET" As String)
     this.Parse                     = http_parse
     this.AddParam                  = http_add_param
     this.AddAllParams              = http_add_all_param
-    this.removeParam               = http_remove_param
+    this.RemoveParam               = http_remove_param
     this.GetURL                    = http_get_url
     this.GetParams                 = http_get_params
     this.ParamGroup                = http_get_param_group

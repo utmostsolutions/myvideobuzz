@@ -50,7 +50,7 @@ Sub youtube_search()
                     history.Push(keyword)
                     screen.AddSearchTerm(keyword)
                     dialog.Close()
-                    m.DisplayVideoList(videos, "Search Results for " + Chr(39) + keyword + Chr(39), xml.link, invalid)
+                    m.DisplayVideoList(videos, "Search Results for " + Chr(39) + keyword + Chr(39), xml.link, invalid, invalid)
                 else
                     dialog.Close()
                     ShowErrorDialog("No videos match your search", "Search results")
