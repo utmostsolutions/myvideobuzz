@@ -16,7 +16,7 @@ End Sub
 Sub ShowHomeScreen()
     ' Pop up start of UI for some instant feedback while we load the icon data
     ytusername = RegRead("YTUSERNAME1", invalid)
-    screen=uitkPreShowPosterMenu("flat-category", ytusername)
+    screen = uitkPreShowPosterMenu("flat-category", ytusername)
     if (screen = invalid) then
         'print "unexpected error in uitkPreShowPosterMenu"
         return

@@ -286,8 +286,7 @@ Sub DisplayVideoList_impl(videos As Object, title As String, links=invalid, scre
                     return video
                 end if
             end function]
-
-        uitkDoCategoryMenu(categoryList, screen, oncontent_callback, onclick_callback)
+        uitkDoCategoryMenu(categoryList, screen, oncontent_callback, onclick_callback, onplay_callback)
     else if (videos.Count() > 0) then
         metadata = metadataFunc(videos)
         for each link in links
@@ -316,31 +315,35 @@ Sub DisplayVideoList_impl(videos As Object, title As String, links=invalid, scre
                     youtube.VideoDetails(video[set_idx], youtube.CurrentPageTitle, video, set_idx)
                 end if
             end function]
-        onplay = [1, metadata, m,
-            Function(video, youtube, set_idx)
-                result = video_get_qualities(video[set_idx])
-                if (result = 0) then
-                    DisplayVideo(video[set_idx])
-                end if
-            end Function]
-        uitkDoPosterMenu(metadata, screen, onselect, onplay)
+        uitkDoPosterMenu(metadata, screen, onselect, onplay_callback)
     else
         uitkDoMessage("No videos found.", screen)
     end if
 End Sub
 
+'********************************************************************
+' Callback function for when the user hits the play button from the video list
+' screen.
+' @param theVideo the video metadata object that should be played.
+'********************************************************************
+Sub onplay_callback(theVideo as Object)
+    result = video_get_qualities(theVideo)
+    if (result = 0) then
+        DisplayVideo(theVideo)
+    end if
+End Sub
 
 '********************************************************************
+' Creates the list of categories from the provided XML
+' @param xmlList the XML to create the category list from.
+' @return an roList, which will be sorted by the yt:unreadCount if the XML
+'         represents a list of subscriptions.
 '********************************************************************
-'***** YouTube
-'***** working with metadata for the poster/springboard screens
-'********************************************************************
-'********************************************************************
-Function CategoriesListFromXML_impl(xmllist As Object) As Object
+Function CategoriesListFromXML_impl(xmlList As Object) As Object
     'print "CategoriesListFromXML_impl init"
     categoryList  = CreateObject("roList")
-    for each record in xmllist
-        ''printAny(0, "xmllist:", record)
+    for each record in xmlList
+        ''printAny(0, "xmlList:", record)
         category        = CreateObject("roAssociativeArray")
         category.title  = record.GetNamedElements("title").GetText()
         category.link   = validstr(record.content@src)
@@ -372,21 +375,19 @@ End Function
 
 
 '********************************************************************
+' Creates a list of video metadata objects from the provided XML
+' @param xmlList the XML to create the list of videos from
+' @return an roList of video metadata objects
 '********************************************************************
-'***** YouTube
-'***** working with metadata for the poster/springboard screens
-'********************************************************************
-'********************************************************************
-Function youtube_new_video_list(xmllist As Object) As Object
+Function youtube_new_video_list(xmlList As Object) As Object
     'print "youtube_new_video_list init"
-    videolist=CreateObject("roList")
-    for each record in xmllist
-        video=m.newVideoFromXML(record)
+    videolist = CreateObject("roList")
+    for each record in xmlList
+        video = m.newVideoFromXML(record)
         videolist.Push(video)
     next
     return videolist
 End Function
-
 
 Function youtube_new_video(xml As Object) As Object
     video               = CreateObject("roAssociativeArray")
@@ -406,7 +407,6 @@ Function youtube_new_video(xml As Object) As Object
     'video.GetURL       = video_get_url
     return video
 End Function
-
 
 Function GetVideoMetaData(videos As Object)
     metadata = []
@@ -451,6 +451,7 @@ Function get_desc() As Dynamic
     if (desc.Count() > 0) then
         return Left(desc[0].GetText(), 300)
     end if
+    return invalid
 End Function
 
 '*******************************************

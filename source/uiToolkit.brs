@@ -28,7 +28,7 @@ Function uitkPreShowPosterMenu(ListStyle="flat-category" as String, breadA = "Ho
 end function
 
 
-Function uitkDoPosterMenu(posterdata, screen, onselect_callback=invalid, onplay_callback=invalid) As Integer
+Function uitkDoPosterMenu(posterdata, screen, onselect_callback = invalid, onplay_func = invalid) As Integer
 
     if (type(screen) <> "roPosterScreen") then
         'print "illegal type/value for screen passed to uitkDoPosterMenu()"
@@ -86,14 +86,10 @@ Function uitkDoPosterMenu(posterdata, screen, onselect_callback=invalid, onplay_
             else if (msg.isListItemFocused()) then
                 idx% = msg.GetIndex()
             else if (msg.isRemoteKeyPressed()) then
-                ' If the play button is pressed on the video list, and the onplay_callback is valid, play the video
-                if (onplay_callback <> invalid AND msg.GetIndex() = 13) then
-                    userdata1 = onplay_callback[1]
-                    userdata2 = onplay_callback[2]
-                    f = onplay_callback[3]
-                    f(userdata1, userdata2, idx%)
+                ' If the play button is pressed on the video list, and the onplay_func is valid, play the video
+                if (onplay_func <> invalid AND msg.GetIndex() = 13) then
+                    onplay_func(posterdata[idx%])
                 end if
-                
             end if
             
         end if
@@ -178,7 +174,7 @@ Function uitkDoListMenu(posterdata, screen, onselect_callback=invalid) As Intege
 End Function
 
 
-Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_callback) As Integer
+Function uitkDoCategoryMenu(categoryList, screen, content_callback = invalid, onclick_callback = invalid, onplay_func = invalid) As Integer
     'Set current category to first in list
     category_idx = 0
     contentlist = []
@@ -188,7 +184,7 @@ Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_call
     contentdata2 = content_callback[1]
     content_f = content_callback[2]
 
-    contentlist=content_f(contentdata1, contentdata2, 0)
+    contentlist = content_f(contentdata1, contentdata2, 0)
 
     if (contentlist.Count() = 0) then
         screen.SetContentList([])
@@ -199,6 +195,7 @@ Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_call
         screen.clearmessage()
     end if
     screen.Show()
+    idx% = 0
 
     while (true)
         msg = wait(0, screen.GetMessagePort())
@@ -228,8 +225,15 @@ Function uitkDoCategoryMenu(categoryList, screen, content_callback, onclick_call
                     screen.SetContentList(contentlist)
                     screen.SetFocusedListItem(msg.GetIndex())
                 end if
+            else if (msg.isListItemFocused()) then
+                idx% = msg.GetIndex()
             else if (msg.isScreenClosed()) then
                 return -1
+            else if (msg.isRemoteKeyPressed()) then
+                ' If the play button is pressed on the video list, and the onplay_func is valid, play the video
+                if (onplay_func <> invalid AND msg.GetIndex() = 13) then
+                    onplay_func(contentlist[idx%])
+                end if
             end if
         end If
     end while
