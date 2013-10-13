@@ -65,9 +65,9 @@ Function InitYouTube() As Object
 
     'Settings
     this.BrowseSettings = youtube_browse_settings
-    this.DelinkPlayer = youtube_delink
     this.About = youtube_about
     this.AddAccount = youtube_add_account
+    this.RedditSettings = EditRedditSettings
 
     return this
 End Function

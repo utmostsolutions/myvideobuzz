@@ -16,12 +16,20 @@ Sub ViewReddits(youtube as Object, url = "videos" as String)
     screen = uitkPreShowPosterMenu("flat-episodic-16x9", "Reddit")
     screen.showMessage("Loading subreddits...")
     title = "Reddit"
+    if (url = "videos") then
+        tempSubs = RegRead("subreddits", "reddit")
+        if (tempSubs <> invalid) then
+            if (Len(tempSubs) > 0) then
+                url = tempSubs
+            end if
+        end if
+    end if
     response = QueryReddit(url)
     if (response.status = 403) then
         ShowErrorDialog(title + " may be private, or unavailable at this time. Try again.", "403 Forbidden")
         return
     end if
-    if (response.status <> 200 OR response.json.kind <> "Listing") then
+    if (response.status <> 200 OR response.json = invalid OR response.json.kind <> "Listing") then
         ShowConnectionFailed()
         return
     end if
@@ -61,25 +69,26 @@ Function QueryReddit(url = "videos" as String) As Object
     ' print "----------------------------------"
 
     json = ParseJson(rsp)
-
     links = CreateObject("roArray", 1, true)
-    if (json.data.after <> invalid) then
-        link = CreateObject("roAssociativeArray")
-        link.func = ViewReddits
-        link.type = "next"
-        http.RemoveParam("after", "urlParams")
-        http.AddParam("after", json.data.after, "urlParams")
-        link.href = http.GetURL()
-        links.Push(link)
-    end if
-    if (json.data.before <> invalid) then
-        link = CreateObject("roAssociativeArray")
-        link.func = ViewReddits
-        link.type = "previous"
-        http.RemoveParam("before", "urlParams")
-        http.AddParam("before", json.data.before, "urlParams")
-        link.href = http.GetURL()
-        links.Push(link)
+    if (json <> invalid) then
+        if (json.data.after <> invalid) then
+            link = CreateObject("roAssociativeArray")
+            link.func = ViewReddits
+            link.type = "next"
+            http.RemoveParam("after", "urlParams")
+            http.AddParam("after", json.data.after, "urlParams")
+            link.href = http.GetURL()
+            links.Push(link)
+        end if
+        if (json.data.before <> invalid) then
+            link = CreateObject("roAssociativeArray")
+            link.func = ViewReddits
+            link.type = "previous"
+            http.RemoveParam("before", "urlParams")
+            http.AddParam("before", json.data.before, "urlParams")
+            link.href = http.GetURL()
+            links.Push(link)
+        end if
     end if
     returnObj = CreateObject("roAssociativeArray")
     returnObj.json = json
@@ -96,7 +105,7 @@ End Function
 Function NewRedditVideoList(jsonObject As Object) As Object
     videoList = CreateObject("roList")
     for each record in jsonObject
-        domain = record.data.domain
+        domain = LCase(record.data.domain).Trim()
         if (domain = "youtube.com" OR domain = "youtu.be") then
             video = NewRedditVideo(record)
             if (video.GetID() <> invalid AND video.GetID() <> "") then
@@ -192,3 +201,90 @@ Function GetRedditMetaData(videoList As Object) as Object
 
     return metadata
 End Function
+
+Sub EditRedditSettings()
+    port = CreateObject("roMessagePort")
+    screen = CreateObject("roSearchScreen")
+    screen.SetMessagePort(port)
+
+    history = CreateObject("roSearchHistory")
+    subreddits = RegRead("subreddits", "reddit")
+    if (RegRead("enabled", "reddit") = invalid) then
+        if (subreddits <> invalid) then
+            regex = CreateObject("roRegex", "\+", "") ' split on plus
+            subredditArray = regex.Split(subreddits)
+        else
+            subredditArray = ["videos"]
+        end if
+    else
+        subredditArray = []
+    end if
+    screen.SetSearchTerms(subredditArray)
+    screen.SetBreadcrumbText("", "Hit the * button to remove a subreddit")
+    screen.SetSearchTermHeaderText("Current Subreddits:")
+    screen.SetClearButtonText("Remove All")
+    screen.SetSearchButtonText("Add Subreddit")
+    screen.SetEmptySearchTermsText("The reddit channel will be disabled")
+    screen.Show()
+
+    while (true)
+        msg = wait(0, port)
+
+        if (type(msg) = "roSearchScreenEvent") then
+            'print "Event: "; msg.GetType(); " msg: "; msg.GetMessage()
+            if (msg.isScreenClosed()) then
+                exit while
+            else if (msg.isPartialResult()) then
+                ' Ignore it
+            else if (msg.isFullResult()) then
+                ' Check to see if they're trying to add a duplicate subreddit, or empty string
+                newOne = msg.GetMessage()
+                if (Len(newOne.Trim()) > 0) then
+                    found = false
+                    for each subreddit in subredditArray
+                        if (LCase(subreddit).Trim() = LCase(newOne).Trim()) then
+                            found = true
+                            exit for
+                        end if
+                    next
+                    if (not(found)) then
+                        if (subredditArray.Count() = 0) then
+                            subredditArray = []
+                        end if
+                        subredditArray.Push(newOne)
+
+                        screen.SetSearchTerms(subredditArray)
+                        RegDelete("enabled", "reddit")
+                    end if
+                end if
+            else if (msg.isCleared()) then
+                subredditArray.Clear()
+                screen.ClearSearchTerms()
+                RegWrite("enabled", "false", "reddit")
+            else if ((msg.isRemoteKeyPressed() AND msg.GetIndex() = 10) OR msg.isButtonInfo()) then
+                if (subredditArray.Count() > 0) then
+                    subredditArray.Delete(msg.GetIndex())
+                    screen.SetSearchTerms(subredditArray)
+                end if
+            'else
+                'print("Unhandled event on search screen")
+            end if
+        'else
+            'print("Unhandled msg type: " + type(msg))
+        end if
+    end while
+    ' Save the user's subreddits when the settings screen is closing
+    subString = ""
+    if ( subredditArray.Count() > 0 ) then
+        for i = 0 to subredditArray.Count() - 1
+            subString = subString + subredditArray[i]
+            if ( i < subredditArray.Count() - 1 ) then
+                subString = subString + "+"
+            end if
+        next
+        RegWrite("subreddits", subString, "reddit")
+    else
+        ' If their list is empty, just remove the unused registry key
+        RegDelete("subreddits", "reddit")
+    end if
+End Sub

@@ -46,7 +46,9 @@ Sub ShowHomeScreen()
         menudata.Push({ShortDescriptionLine1:"My Subscriptions", FeedURL:"users/" + ytusername + "/subscriptions?v=2&max-results=50", Category:"true", ShortDescriptionLine2:"Browse your Subscriptions", HDPosterUrl:"pkg:/images/YourSubscriptions.jpg", SDPosterUrl:"pkg:/images/YourSubscriptions.jpg"})
         menudata.Push({ShortDescriptionLine1:"My Favorites", FeedURL:"users/" + ytusername + "/favorites?v=2&max-results=50", Category:"false", ShortDescriptionLine2:"Browse your favorite videos", HDPosterUrl:"pkg:/images/YourFavorites.jpg", SDPosterUrl:"pkg:/images/YourFavorites.jpg"})
     end if
-    menudata.Push({ShortDescriptionLine1:"Reddit", ShortDescriptionLine2: "Browse /r/videos", Custom: true, ViewFunc: ViewReddits, HDPosterUrl:"pkg:/images/reddit_beta.jpg", SDPosterUrl:"pkg:/images/reddit_beta.jpg"})
+    if (RegRead("enabled", "reddit") = invalid) then
+        menudata.Push({ShortDescriptionLine1:"Reddit", ShortDescriptionLine2: "Browse YouTube videos from reddit", Custom: true, ViewFunc: ViewReddits, HDPosterUrl:"pkg:/images/reddit_beta.jpg", SDPosterUrl:"pkg:/images/reddit_beta.jpg"})
+    end if
     menudata.Push({ShortDescriptionLine1:"Top Channels", FeedURL:"pkg:/xml/topchannels.xml", Category:"true",  ShortDescriptionLine2:"Top Channels", HDPosterUrl:"pkg:/images/TopChannels.jpg", SDPosterUrl:"pkg:/images/TopChannels.jpg"})
     menudata.Push({ShortDescriptionLine1:"Most Popular", FeedURL:"pkg:/xml/mostpopular.xml", Category:"true",  ShortDescriptionLine2:"Most Popular Videos", HDPosterUrl:"pkg:/images/MostPopular.jpg", SDPosterUrl:"pkg:/images/mostpopular.jpg"})
 
