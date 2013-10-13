@@ -61,7 +61,7 @@ Function InitYouTube() As Object
     'Categories
     this.CategoriesListFromXML  = CategoriesListFromXML_impl
 
-    this.BuildButtons = build_buttons
+    this.BuildButtons = BuildButtons_impl
 
     'Settings
     this.BrowseSettings = youtube_browse_settings
@@ -427,7 +427,7 @@ Function GetVideoMetaData(videos As Object)
         meta.ShortDescriptionLine2  = meta.Title
         meta.SDPosterUrl            = video.GetThumb()
         meta.HDPosterUrl            = video.GetThumb()
-        meta.Length                 = video.GetLength()
+        meta.Length                 = video.GetLength().toInt()
         meta.xml                    = video.xml
         meta.UserID                 = video.GetUserID()
         meta.ReleaseDate            = video.GetUploadDate()
@@ -491,7 +491,7 @@ End Function
 '*******************************************
 Function get_length_as_human_readable(length As Dynamic) As String
     if (type(length) = "roString") then
-        len% = length.toint()
+        len% = length.ToInt()
     else if (type(length) = "roInteger") then
         len% = length
     else
@@ -585,6 +585,7 @@ Sub VideoDetails_impl(theVideo As Object, breadcrumb As String, videos=invalid, 
                     result = video_get_qualities(m.video)
                     if (result = 0) then
                         DisplayVideo(m.video)
+                        buttons = m.BuildButtons()
                     end if
                 else if (msg.GetIndex() = 1) then ' Play All
                     for i = idx to videos.Count() - 1  Step +1
@@ -593,6 +594,7 @@ Sub VideoDetails_impl(theVideo As Object, breadcrumb As String, videos=invalid, 
                         if (result = 0) then
                             ret = DisplayVideo(selectedVideo)
                             if (ret > 0) then
+                                buttons = m.BuildButtons()
                                 Exit For
                             end if
                         end if
@@ -639,16 +641,20 @@ End Sub
 ' Helper function to build the list of buttons on the springboard
 ' @return an roAssociativeArray of the buttons
 '********************************************************************
-Function build_buttons() as Object
+Function BuildButtons_impl() as Object
     m.screen.ClearButtons()
     buttons = CreateObject("roAssociativeArray")
 
-    buttons["play"]         = m.screen.AddButton(0, "Play")
+    if (m.video.Live = false AND m.video.PlayStart > 0) then
+        buttons["play"]         = m.screen.AddButton(0, "Resume")
+    else
+        buttons["play"]         = m.screen.AddButton(0, "Play")
+    end if
     buttons["play_all"]     = m.screen.AddButton(1, "Play All")
     if (m.video.Author <> invalid) then
         buttons["show_related"] = m.screen.AddButton(2, "Show Related Videos")
         buttons["more"]         = m.screen.AddButton(3, "More Videos By " + m.video.Author)
-        buttons["playlists"]    = m.screen.AddButton(4, "Show user's playlists")
+        buttons["playlists"]    = m.screen.AddButton(4, "Show "+ m.video.Author + "'s playlists")
     end if
     return buttons
 End Function
@@ -660,6 +666,7 @@ Function DisplayVideo(content As Object)
     p = CreateObject("roMessagePort")
     video = CreateObject("roVideoScreen")
     video.setMessagePort(p)
+    video.SetPositionNotificationPeriod(5)
 
     video.SetContent(content)
     video.show()
@@ -676,6 +683,14 @@ Function DisplayVideo(content As Object)
                 exit while
             else if (msg.isRequestFailed()) then
                 'print "play failed: "; msg.GetMessage()
+            else if (msg.isPlaybackPosition()) then
+                content.PlayStart = msg.GetIndex()
+            else if (msg.isFullResult()) then
+                content.PlayStart = 0
+            else if (msg.isPartialResult()) then
+                if (content.PlayStart > (content.Length - 30)) then
+                    content.PlayStart = 0
+                end if
             else
                 'print "Unknown event: "; msg.GetType(); " msg: "; msg.GetMessage()
             end if
@@ -750,7 +765,7 @@ function getMP4Url(video as Object, timeout = 0 as integer, loginCookie = "" as 
             if (video.Streams.Count() > 0) then
                 video.Live          = false
                 video.StreamFormat  = "mp4"
-                video.PlayStart     = 0
+                'video.PlayStart     = 0
             end if
         else
             hlsUrl = CreateObject("roRegex", "hlsvp=([^(" + Chr(34) + "|&|$)]*)", "").Match(htmlString)
