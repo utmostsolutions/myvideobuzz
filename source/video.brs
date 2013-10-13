@@ -581,7 +581,14 @@ Sub VideoDetails_impl(theVideo As Object, breadcrumb As String, videos=invalid, 
                 exit while
             else if (msg.isButtonPressed()) then
                 'print "Button pressed: "; msg.GetIndex(); " " msg.GetData()
-                if (msg.GetIndex() = 0) then ' Play
+                if (msg.GetIndex() = 0) then ' Play/Resume
+                    result = video_get_qualities(m.video)
+                    if (result = 0) then
+                        DisplayVideo(m.video)
+                        buttons = m.BuildButtons()
+                    end if
+                else if (msg.GetIndex() = 5) then ' Play from beginning
+                    m.PlayStart = 0
                     result = video_get_qualities(m.video)
                     if (result = 0) then
                         DisplayVideo(m.video)
@@ -644,15 +651,20 @@ End Sub
 Function BuildButtons_impl() as Object
     m.screen.ClearButtons()
     buttons = CreateObject("roAssociativeArray")
-
+    resumeEnabled = false
     if (m.video.Live = false AND m.video.PlayStart > 0) then
-        buttons["play"]         = m.screen.AddButton(0, "Resume")
+        resumeEnabled = true
+        buttons["resume"]         = m.screen.AddButton(0, "Resume")
+        buttons["restart"]        = m.screen.AddButton(5, "Play from beginning")
     else
-        buttons["play"]         = m.screen.AddButton(0, "Play")
+        buttons["play"]           = m.screen.AddButton(0, "Play")
     end if
     buttons["play_all"]     = m.screen.AddButton(1, "Play All")
     if (m.video.Author <> invalid) then
-        buttons["show_related"] = m.screen.AddButton(2, "Show Related Videos")
+        ' Hide related videos if the Resume/Play from beginning options are enabled
+        if (not(resumeEnabled)) then
+            buttons["show_related"] = m.screen.AddButton(2, "Show Related Videos")
+        end if
         buttons["more"]         = m.screen.AddButton(3, "More Videos By " + m.video.Author)
         buttons["playlists"]    = m.screen.AddButton(4, "Show "+ m.video.Author + "'s playlists")
     end if
@@ -688,9 +700,14 @@ Function DisplayVideo(content As Object)
             else if (msg.isFullResult()) then
                 content.PlayStart = 0
             else if (msg.isPartialResult()) then
-                if (content.PlayStart > (content.Length - 30)) then
-                    content.PlayStart = 0
+                ' For plugin videos, the Length may not be available.
+                if (content.Length <> invalid) then
+                    ' If we're within 30 seconds of the end of the video, don't allow resume
+                    if (content.PlayStart > (content.Length - 30)) then
+                        content.PlayStart = 0
+                    end if
                 end if
+                ' Else if the length isn't valid, always allow resume
             else
                 'print "Unknown event: "; msg.GetType(); " msg: "; msg.GetMessage()
             end if
