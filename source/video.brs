@@ -7,6 +7,7 @@ End Function
 Function InitYouTube() As Object
     ' constructor
     this = CreateObject("roAssociativeArray")
+    this.device_id = CreateObject("roDeviceInfo").GetDeviceUniqueId()
     this.oauth_prefix = "https://www.google.com/accounts"
     this.link_prefix = "http://roku.toasterdesigns.net"
     this.devKey = "AI39si7xeR7W6rGgB9pZ3xBKHZnPVlBBdU3HZnhFXg8g7_3V8rplFNAT6rx_SVRzLRPhhNN-JARUjVg4JKGI5xjO00lK_Omb7g"
@@ -32,8 +33,12 @@ Function InitYouTube() As Object
     end if
 
     this.CurrentPageTitle = ""
-    this.screen=invalid
-    this.video=invalid
+    this.screen       = invalid
+    this.video        = invalid
+
+    ' Caches the latest video the user has watched
+    ' This is used when sending out the video over the network
+    this.activeVideo = invalid
 
     'API Calls
     this.ExecServerAPI = youtube_exec_api
@@ -43,7 +48,7 @@ Function InitYouTube() As Object
 
     'User videos
     this.BrowseUserVideos = youtube_user_videos
-    
+
     ' Playlists
     this.BrowseUserPlaylists = BrowseUserPlaylists_impl
 
@@ -51,7 +56,8 @@ Function InitYouTube() As Object
     this.ShowRelatedVideos = youtube_related_videos
 
     'Videos
-    this.DisplayVideoList = DisplayVideoList_impl
+    this.DisplayVideoListFromVideoList = DisplayVideoListFromVideoList_impl
+    this.DisplayVideoListFromMetadataList = DisplayVideoListFromMetadataList_impl
     this.FetchVideoList = FetchVideoList_impl
     this.VideoDetails = VideoDetails_impl
     this.newVideoListFromXML = youtube_new_video_list
@@ -68,6 +74,9 @@ Function InitYouTube() As Object
     this.About = youtube_about
     this.AddAccount = youtube_add_account
     this.RedditSettings = EditRedditSettings
+
+    this.udp_socket = invalid
+    this.mp_socket  = invalid
 
     return this
 End Function
@@ -222,10 +231,10 @@ Sub FetchVideoList_impl(APIRequest As Dynamic, title As String, username As Dyna
     if (categories = true) then
         categories = m.CategoriesListFromXML(xml.entry)
         'PrintAny(0, "categoryList:", categories)
-        m.DisplayVideoList([], title, xml.link, screen, categories)
+        m.DisplayVideoListFromVideoList([], title, xml.link, screen, categories)
     else
         videos = m.newVideoListFromXML(xml.entry)
-        m.DisplayVideoList(videos, title, xml.link, screen, invalid)
+        m.DisplayVideoListFromVideoList(videos, title, xml.link, screen, invalid)
     end if
 End Sub
 
@@ -253,7 +262,16 @@ Function youtube_return_video(APIRequest As Dynamic, title As String, username A
     return metadata
 End Function
 
-Sub DisplayVideoList_impl(videos As Object, title As String, links=invalid, screen = invalid, categories = invalid, metadataFunc = GetVideoMetaData as Function)
+Sub DisplayVideoListFromVideoList_impl(videos As Object, title As String, links=invalid, screen = invalid, categories = invalid, metadataFunc = GetVideoMetaData as Function)
+    if (categories = invalid) then
+        metadata = metadataFunc(videos)
+    else
+        metadata = videos
+    end if
+    m.DisplayVideoListFromMetadataList(metadata, title, links, screen, categories)
+End Sub
+
+Sub DisplayVideoListFromMetadataList_impl(metadata As Object, title As String, links=invalid, screen = invalid, categories = invalid)
     if (screen = invalid) then
         screen = uitkPreShowPosterMenu("flat-episodic-16x9", title)
         screen.showMessage("Loading...")
@@ -287,8 +305,7 @@ Sub DisplayVideoList_impl(videos As Object, title As String, links=invalid, scre
                 end if
             end function]
         uitkDoCategoryMenu(categoryList, screen, oncontent_callback, onclick_callback, onplay_callback)
-    else if (videos.Count() > 0) then
-        metadata = metadataFunc(videos)
+    else if (metadata.Count() > 0) then
         for each link in links
             if (type(link) = "roXMLElement") then
                 if (link@rel = "next") then
@@ -347,7 +364,7 @@ Function CategoriesListFromXML_impl(xmlList As Object) As Object
         category        = CreateObject("roAssociativeArray")
         category.title  = record.GetNamedElements("title").GetText()
         category.link   = validstr(record.content@src)
-        
+
         if (record.GetNamedElements("yt:unreadCount").Count() > 0) then
             category.unreadCount% = record.GetNamedElements("yt:unreadCount").GetText().toInt()
         else
@@ -415,27 +432,27 @@ Function GetVideoMetaData(videos As Object)
         meta = CreateObject("roAssociativeArray")
         meta.ContentType = "movie"
 
-        meta.ID                     = video.GetID()
-        meta.Author                 = video.GetAuthor()
-        meta.TitleSeason            = video.GetTitle()
-        meta.Title                  = video.GetAuthor() + "  - " + get_length_as_human_readable(video.GetLength())
-        meta.Actors                 = meta.Author
-        meta.Description            = video.GetDesc()
-        meta.Categories             = video.GetCategory()
-        meta.StarRating             = video.GetRating()
-        meta.ShortDescriptionLine1  = meta.TitleSeason
-        meta.ShortDescriptionLine2  = meta.Title
-        meta.SDPosterUrl            = video.GetThumb()
-        meta.HDPosterUrl            = video.GetThumb()
-        meta.Length                 = video.GetLength().toInt()
-        meta.xml                    = video.xml
-        meta.UserID                 = video.GetUserID()
-        meta.ReleaseDate            = video.GetUploadDate()
-        meta.StreamFormat           = "mp4"
-        meta.Live                   = false
-        meta.Streams                = []
-        meta.PlayStart              = 0
-        meta.SwitchingStrategy      = "no-adaptation"
+        meta["ID"]                     = video.GetID()
+        meta["Author"]                 = video.GetAuthor()
+        meta["TitleSeason"]            = video.GetTitle()
+        meta["Title"]                  = video.GetAuthor() + "  - " + get_length_as_human_readable(video.GetLength())
+        meta["Actors"]                 = meta.Author
+        meta["Description"]            = video.GetDesc()
+        meta["Categories"]             = video.GetCategory()
+        meta["StarRating"]             = video.GetRating()
+        meta["ShortDescriptionLine1"]  =  meta.TitleSeason
+        meta["ShortDescriptionLine2"]  = meta.Title
+        meta["SDPosterUrl"]            = video.GetThumb()
+        meta["HDPosterUrl"]            = video.GetThumb()
+        meta["Length"]                 = video.GetLength().toInt()
+        meta["xml"]                    = video.xml
+        meta["UserID"]                 = video.GetUserID()
+        meta["ReleaseDate"]            = video.GetUploadDate()
+        meta["StreamFormat"]           = "mp4"
+        meta["Live"]                   = false
+        meta["Streams"]                = []
+        meta["PlayStart"]              = 0
+        meta["SwitchingStrategy"]      = "no-adaptation"
         'meta.StreamBitrates=[]
         'meta.StreamQualities=[]
         'meta.StreamUrls=[]
@@ -574,7 +591,7 @@ Sub VideoDetails_impl(theVideo As Object, breadcrumb As String, videos=invalid, 
     screen.Show()
 
     while (true)
-        msg = wait(0, screen.GetMessagePort())
+        msg = wait(2000, screen.GetMessagePort())
         if (type(msg) = "roSpringboardScreenEvent") then
             if (msg.isScreenClosed()) then
                 'print "Closing springboard screen"
@@ -588,7 +605,7 @@ Sub VideoDetails_impl(theVideo As Object, breadcrumb As String, videos=invalid, 
                         buttons = m.BuildButtons()
                     end if
                 else if (msg.GetIndex() = 5) then ' Play from beginning
-                    m.PlayStart = 0
+                    m["PlayStart"] = 0
                     result = video_get_qualities(m.video)
                     if (result = 0) then
                         DisplayVideo(m.video)
@@ -640,6 +657,8 @@ Sub VideoDetails_impl(theVideo As Object, breadcrumb As String, videos=invalid, 
             else
                 'print "Unknown event: "; msg.GetType(); " msg: "; msg.GetMessage()
             end if
+        else if (msg = invalid) then
+            CheckForMCast()
         end If
     end while
 End Sub
@@ -680,6 +699,11 @@ Function DisplayVideo(content As Object)
     video.setMessagePort(p)
     video.SetPositionNotificationPeriod(5)
 
+    yt = LoadYouTube()
+
+    ' Cache the video information for network sharing
+    yt.activeVideo = content
+
     video.SetContent(content)
     video.show()
     ret = -1
@@ -696,15 +720,19 @@ Function DisplayVideo(content As Object)
             else if (msg.isRequestFailed()) then
                 'print "play failed: "; msg.GetMessage()
             else if (msg.isPlaybackPosition()) then
-                content.PlayStart = msg.GetIndex()
+                content["PlayStart"] = msg.GetIndex()
             else if (msg.isFullResult()) then
-                content.PlayStart = 0
+                content["PlayStart"] = 0
+                ' The video has completed, zero out the cached version
+                yt.activeVideo    = invalid
             else if (msg.isPartialResult()) then
                 ' For plugin videos, the Length may not be available.
                 if (content.Length <> invalid) then
                     ' If we're within 30 seconds of the end of the video, don't allow resume
                     if (content.PlayStart > (content.Length - 30)) then
-                        content.PlayStart = 0
+                        content["PlayStart"] = 0
+                        ' The video has completed, zero out the cached version
+                        yt.activeVideo    = invalid
                     end if
                 end if
                 ' Else if the length isn't valid, always allow resume
@@ -782,7 +810,7 @@ function getMP4Url(video as Object, timeout = 0 as integer, loginCookie = "" as 
             if (video.Streams.Count() > 0) then
                 video.Live          = false
                 video.StreamFormat  = "mp4"
-                'video.PlayStart     = 0
+                'video["PlayStart"] = 0
             end if
         else
             hlsUrl = CreateObject("roRegex", "hlsvp=([^(" + Chr(34) + "|&|$)]*)", "").Match(htmlString)
@@ -792,13 +820,13 @@ function getMP4Url(video as Object, timeout = 0 as integer, loginCookie = "" as 
                 video.Streams.Clear()
                 video.Live              = true
                 ' Set the PlayStart sufficiently large so it starts at 'Live' position
-                video.PlayStart         = 500000
+                video["PlayStart"]        = 500000
                 video.StreamFormat      = "hls"
                 'video.SwitchingStrategy = "unaligned-segments"
                 video.SwitchingStrategy = "minimum-adaptation"
                 video.Streams.Push({url: urlDecoded, bitrate: 0, quality: false, contentid: -1})
             end if
-            
+
         end if
     else
         print ("Nothing in urlEncodedFmtStreamMap")

@@ -29,7 +29,6 @@ end function
 
 
 Function uitkDoPosterMenu(posterdata, screen, onselect_callback = invalid, onplay_func = invalid) As Integer
-
     if (type(screen) <> "roPosterScreen") then
         'print "illegal type/value for screen passed to uitkDoPosterMenu()"
         return -1
@@ -38,10 +37,9 @@ Function uitkDoPosterMenu(posterdata, screen, onselect_callback = invalid, onpla
     screen.SetContentList(posterdata)
     idx% = 0
     while (true)
-        msg = wait(0, screen.GetMessagePort())
+        msg = wait(2000, screen.GetMessagePort())
 
         'print "uitkDoPosterMenu | msg type = ";type(msg)
-
         if (type(msg) = "roPosterScreenEvent") then
             'print "event.GetType()=";msg.GetType(); " event.GetMessage()= "; msg.GetMessage()
             if (msg.isListItemSelected()) then
@@ -91,7 +89,8 @@ Function uitkDoPosterMenu(posterdata, screen, onselect_callback = invalid, onpla
                     onplay_func(posterdata[idx%])
                 end if
             end if
-            
+        else if (msg = invalid) then
+            CheckForMCast()
         end if
     end while
 End Function
@@ -198,7 +197,7 @@ Function uitkDoCategoryMenu(categoryList, screen, content_callback = invalid, on
     idx% = 0
 
     while (true)
-        msg = wait(0, screen.GetMessagePort())
+        msg = wait(2000, screen.GetMessagePort())
         if (type(msg) = "roPosterScreenEvent") then
             if (msg.isListFocused()) then
                 category_idx = msg.GetIndex()
@@ -235,6 +234,8 @@ Function uitkDoCategoryMenu(categoryList, screen, content_callback = invalid, on
                     onplay_func(contentlist[idx%])
                 end if
             end if
+        else if (msg = invalid) then
+            CheckForMCast()
         end If
     end while
 End Function

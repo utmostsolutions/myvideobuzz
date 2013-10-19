@@ -918,3 +918,81 @@ Function simpleJSONParser( jsonString As String ) As Object
         Eval( "jsonObject = " + jsonString )
         Return jsonObject
 End Function
+
+Function SimpleJSONBuilder( jsonArray As Object ) As String
+    Return SimpleJSONAssociativeArray( jsonArray )
+End Function
+
+
+Function SimpleJSONAssociativeArray( jsonArray As Object ) As String
+    jsonString = "{"
+   
+    For Each key in jsonArray
+        value = jsonArray[ key ]
+        valType = type(value)
+        if (valType <> "roInvalid") then
+            jsonString = jsonString + Chr(34) + key + Chr(34) + ":"
+            if (isstr(value)) then
+                jsonString = jsonString + Chr(34) + value + Chr(34)
+            else if (isint(value) OR isfloat(value)) then
+                jsonString = jsonString + value.ToStr()
+            else if (isbool(value)) then
+                jsonString = jsonString + IIf( value, "true", "false" )
+            else if (valType = "roArray") then
+                jsonString = jsonString + SimpleJSONArray( value )
+            else if (valType = "roAssociativeArray") then
+                jsonString = jsonString + SimpleJSONBuilder( value )
+            else
+                print("Unhandled type: " + type(value))
+                jsonString = jsonString + tostr(value)
+            end If
+            jsonString = jsonString + ","
+        end if
+    Next
+    If Right( jsonString, 1 ) = "," Then
+        jsonString = Left( jsonString, Len( jsonString ) - 1 )
+    End If
+   
+    jsonString = jsonString + "}"
+    Return jsonString
+End Function
+
+
+Function SimpleJSONArray( jsonArray As Object ) As String
+    jsonString = "["
+   
+    For Each value in jsonArray
+        valType = type(value)
+        if (valType <> "roInvalid") then
+            if (isstr(value)) then
+                jsonString = jsonString + Chr(34) + value + Chr(34)
+            else if (isint(value) OR isfloat(value)) then
+                jsonString = jsonString + value.ToStr()
+            else if (isbool(value)) then
+                jsonString = jsonString + IIf( value, "true", "false" )
+            else if (valType = "roArray") then
+                jsonString = jsonString + SimpleJSONArray( value )
+            else if (valType = "roAssociativeArray") then
+                jsonString = jsonString + SimpleJSONBuilder( value )
+            else
+                print("Unhandled type: " + type(value))
+                jsonString = jsonString + tostr(value)
+            end if
+            jsonString = jsonString + ","
+        end if
+    Next
+    If Right( jsonString, 1 ) = "," Then
+        jsonString = Left( jsonString, Len( jsonString ) - 1 )
+    End If
+   
+    jsonString = jsonString + "]"
+    Return jsonString
+End Function
+
+Function IIf( Condition, Result1, Result2 )
+    If Condition Then
+        Return Result1
+    Else
+        Return Result2
+    End If
+End Function

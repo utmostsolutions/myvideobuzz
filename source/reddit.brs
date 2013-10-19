@@ -10,7 +10,6 @@
 ' @param youtube the current youtube instance
 ' @param url an optional URL with the multireddit to query, or the full link to parse. This is used when hitting the 'More Results' or 'Back' buttons on the video list page.
 '     multireddits look like this: videos+funny+humor for /r/videos, /r/funny, and /r/humor
-' TODO: Need to support user-customized subreddits.
 '******************************************************************************
 Sub ViewReddits(youtube as Object, url = "videos" as String)
     screen = uitkPreShowPosterMenu("flat-episodic-16x9", "Reddit")
@@ -37,7 +36,7 @@ Sub ViewReddits(youtube as Object, url = "videos" as String)
     ' Everything is OK, display the list
     json = response.json
     videos = NewRedditVideoList(json.data.children)
-    youtube.DisplayVideoList(videos, title, response.links, screen, invalid, GetRedditMetaData)
+    youtube.DisplayVideoListFromVideoList(videos, title, response.links, screen, invalid, GetRedditMetaData)
 End Sub
 
 '******************************************************************************
@@ -173,7 +172,7 @@ End Function
 ' Custom metadata function needed to simplify displaying of content metadata for reddit results.
 ' This is necessary since the amount of metadata available for videos is much less than that available
 ' when querying YouTube directly.
-' This will be called from video.brs::DisplayVideoList
+' This will be called from video.brs::DisplayVideoListFromVideoList
 ' It would be possible to Query YouTube for the additional metadata, but I don't know if that's worth it.
 ' @param videoList a list of video objects retrieved via the function NewRedditVideo
 ' @return an array of content metadata suitable for the Roku's screen objects.
@@ -182,20 +181,20 @@ Function GetRedditMetaData(videoList As Object) as Object
     metadata = []
 
     for each video in videoList
-        meta                        = CreateObject("roAssociativeArray")
-        meta.ContentType            = "movie"
-        meta.ID                     = video.GetID()
-        meta.TitleSeason            = video.GetTitle()
-        meta.Title                  = "Score: " + tostr(video.GetScore())
-        meta.Actors                 = meta.Title
-        meta.Description            = video.GetDesc()
-        meta.Categories             = video.GetCategory()
-        meta.ShortDescriptionLine1  = meta.TitleSeason
-        meta.ShortDescriptionLine2  = meta.Title
-        meta.SDPosterUrl            = video.GetThumb()
-        meta.HDPosterUrl            = video.GetThumb()
-        meta.StreamFormat           = "mp4"
-        meta.Streams                = []
+        meta                           = CreateObject("roAssociativeArray")
+        meta["ContentType"]            = "movie"
+        meta["ID"]                     = video.GetID()
+        meta["TitleSeason"]            = video.GetTitle()
+        meta["Title"]                  = "Score: " + tostr(video.GetScore())
+        meta["Actors"]                 = meta.Title
+        meta["Description"]            = video.GetDesc()
+        meta["Categories"]             = video.GetCategory()
+        meta["ShortDescriptionLine1"]  = meta.TitleSeason
+        meta["ShortDescriptionLine2"]  = meta.Title
+        meta["SDPosterUrl"]            = video.GetThumb()
+        meta["HDPosterUrl"]            = video.GetThumb()
+        meta["StreamFormat"]           = "mp4"
+        meta["Streams"]                = []
         metadata.Push(meta)
     end for
 

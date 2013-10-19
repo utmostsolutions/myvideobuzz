@@ -3,7 +3,7 @@
 ' Show basic message dialog without buttons
 ' Dialog 'ains up until caller releases the returned object
 '******************************************************
-Function ShowPleaseWait(title As String, text As Dynamic) As Object
+Function ShowPleaseWait(title As String, text = "" As String) As Object
     if (not(isstr(title))) then
         title = ""
     end if
