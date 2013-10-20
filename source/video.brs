@@ -605,7 +605,7 @@ Sub VideoDetails_impl(theVideo As Object, breadcrumb As String, videos=invalid, 
                         buttons = m.BuildButtons()
                     end if
                 else if (msg.GetIndex() = 5) then ' Play from beginning
-                    m["PlayStart"] = 0
+                    m.video["PlayStart"] = 0
                     result = video_get_qualities(m.video)
                     if (result = 0) then
                         DisplayVideo(m.video)
@@ -803,7 +803,7 @@ function getMP4Url(video as Object, timeout = 0 as integer, loginCookie = "" as 
                         video.Streams.Push({url: urlDecoded, bitrate: 2969, quality: true, contentid: pair.itag})
                     else if (pair.itag = "37") then
                         ' 37 is MP4 1080p H.264 at 3-5.9 Mbps video bitrate. I set the bitrate to the maximum, for best results.
-                        video.Streams.Push({url: urlDecoded, bitrate: 6041, quality: false, contentid: pair.itag })
+                        video.Streams.Push({url: urlDecoded, bitrate: 6041, quality: true, contentid: pair.itag })
                     end if
                 end if
             end for
