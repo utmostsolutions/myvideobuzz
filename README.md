@@ -18,7 +18,7 @@ address. Open up a standard web browser and visit the following URL:
 
     http://<rokuPlayer-ip-address> (for example, http://192.168.1.6)
 
-[Download the source as a zip](https://github.com/utmostsolutions/myvideobuzz/raw/master/myvideobuzz.zip) and upload it to your Roku device.
+[Download the source as a zip](https://github.com/Protuhj/myvideobuzz/releases/download/v1.4/MyVideoBuzz_v1_4.zip) and upload it to your Roku device.
 
 Due to limitations in the sandboxing of development Roku channels, you can only
 have one development channel installed at a time.
