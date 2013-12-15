@@ -5,5 +5,5 @@ mm_icon_side_hd=pkg:/images/MainMenu_Icon_Side_HD.png
 mm_icon_focus_sd=pkg:/images/MainMenu_Icon_CenterFocus_SD.png
 mm_icon_side_sd=pkg:/images/MainMenu_Icon_Side_SD.png
 major_version=5
-minor_version=0
-build_version=00010
+minor_version=2
+build_version=00020

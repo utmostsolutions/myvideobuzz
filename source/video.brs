@@ -928,7 +928,12 @@ Sub add_history(video as Object)
 				history.delete(k)
 			end If
 
-			history.Push(histObj)
+			'Is it safe to assume that 50 items will be less than 16KB? Need to find how to check array size in bytes in brightscript
+			if(history.Count() > 50) Then
+				RegWrite.Shift()
+			end If
+
+			history.Unshift(histObj)
 			RegWrite("videos", SimpleJSONArray(history), "history")
 			saved = true
 		end if
@@ -936,7 +941,7 @@ Sub add_history(video as Object)
 
 	if (not(saved)) then
 		history = CreateObject("roArray", 1, true)
-		history.Push(histObj)
+		history.Unshift(histObj)
 		RegWrite("videos", SimpleJSONArray(history), "history")
 	end if
 End Sub
